@@ -116,8 +116,8 @@ update_status ModulePlayer::Update(float dt)
 	turn = acceleration = brake = 0.0f;
 
 	
-	App->camera->Position=vehicle->Position() - vehicle->GoingForward()*10 + vec3(0,5,0);
-	App->camera->LookAt(vehicle->Position());
+	//App->camera->Position=vehicle->Position() - vehicle->GoingForward()*10 + vec3(0,5,0);
+	//App->camera->LookAt(vehicle->Position());
 
 	if(App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
 	{

@@ -30,16 +30,19 @@ public:
 	Sphere s_snake2[MAX_SNAKE];
 	*/
 
+	// Creates a city with random 3x3 blocks
+	void CreateCity(int num_blocks, float max_width, vec3 pos = { 0,0,0 },float buildings_offset = 5.0f);
+
 	// Creates a block of maximum 9 buildings, randomly placed
-	void CreateBlock3x3(vec3 pos, int num_buildings, float block_width, float block_height);
+	void CreateBlock3x3(const vec3 &pos, int num_buildings, const float &block_width, const float &block_height, const float &offset);
 
 	// Creates a plane building, without sidewalk
 	void CreateBuilding(vec3 Position, float w, float h);
 
-	void CreateBuilding(vec3 Position);
+	//void CreateBuilding(vec3 Position);
 
-	Cube a;
-	Cube sidewalk;
+	//Cube a;
+	//Cube sidewalk;
 
 	p2List<Cube*> Building_List;
 	p2List<PhysBody3D*>BuildingPhys_List;

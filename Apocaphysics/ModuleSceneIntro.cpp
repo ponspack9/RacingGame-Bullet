@@ -18,64 +18,113 @@ bool ModuleSceneIntro::Start()
 	LOG("Loading Intro assets");
 	bool ret = true;
 	
-	App->camera->Move(vec3(40.0f, 100.0f, 40.0f));
+	App->camera->Move(vec3(40.0f, 200.0f, 40.0f));
 	App->camera->LookAt(vec3(40.0f, 0.0f, 40.0f));
 	
-
-	CreateBlock3x3({ 20,0,30 },9, 11, 25);
+	CreateCity(9, 150, { -100,0,0 });
 
 	return ret;
+}
+
+
+/*	* Creates a random city based on 3x3 blocks
+	* Random size for each block
+	* num_blocks	-> number of blocks of the city
+	* max_width		-> maximum width of the city
+	* pos			-> position where first block will be placed
+*/
+void ModuleSceneIntro::CreateCity(int num_blocks,float max_width, vec3 pos, float buildings_offset) {
+
+	int n_buildings = 5;
+	int placed = 0;
+	float block_width = 10;
+	float block_height = 10;
+
+	int x_left = max_width;
+	float z_left = max_width;
+	float road_offset = 10.0f;
+
+	vec3 aux_pos = pos;
+
+	for (int i = 0; i < num_blocks; i++) 
+	{
+		if (placed >= num_blocks) return;
+
+		//Defining next block
+		n_buildings = (rand()+SDL_GetTicks()) % 9 +1;
+		block_width = (rand() % 15) + 10.0f;
+		//block_height = rand() % 10 + 5;
+		//x_left -= (block_width + road_offset);
+
+		CreateBlock3x3(pos, n_buildings, block_width, block_height, buildings_offset);
+
+		placed++;
+		pos.x += block_width * 2 + buildings_offset *4 + road_offset;
+
+		if (pos.x >= max_width) {
+			pos.x = aux_pos.x;
+			pos.z += block_width * 2 + buildings_offset * 4 + road_offset;
+			if (pos.z >= max_width) {
+				LOG("City limits exceeded, blocks remaining to place: %d", num_blocks-placed);
+				return;
+			}
+		}
+
+	}
+
+
 }
 
 /* * Creates a block of buildings in a 3x3 grid
    * Maximum 9 buildings
    * Building width and height depends on block size
    * Places it randomly */
-void ModuleSceneIntro::CreateBlock3x3(vec3 pos, int num_buildings, float block_width, float block_height)
+void ModuleSceneIntro::CreateBlock3x3(const vec3 &pos, int num_buildings, const float &block_width, const float &block_height, const float &offset)
 {
 	if (num_buildings > 9) num_buildings = 9;
+	
+	vec3 position = { pos.x + offset, pos.y, pos.z + offset };
+	vec3 aux_position = position;
 
 	int margin = 9 - num_buildings;
 	int placed = 0;
 
-	vec3 aux_pos = pos;
-
-	float offset = 10;
 
 	float width  = block_width  / 3;
 	float height = block_height / 3;
-
+	
+	Cube *sidewalk = new Cube();
 
 	// Creating sidewalk
-	sidewalk.size = vec3(block_width*2 + offset*4, 0.2f, block_width*2 + offset*4);
-	sidewalk.SetPos(block_width + offset + pos.x, 0.2f / 2, block_width + offset + pos.z);
+	sidewalk->size = vec3(block_width*2 + offset*4, 0.2f, block_width*2 + offset*4);
+	sidewalk->SetPos(block_width + offset + position.x, 0.2f / 2, block_width + offset + position.z);
 
-	BuildingPhys_List.add(App->physics->AddBody(sidewalk, 500));
-	Building_List.add(&sidewalk);
+	BuildingPhys_List.add(App->physics->AddBody(*sidewalk, 500));
+	Building_List.add(sidewalk);
 
 
 	// Randomly fills a imaginary 3x3 boolean matrix to place the buildings
 	for (int i = 0; i < 3; i++) 
 	{
-		pos.z = aux_pos.z + i * (width*2 + offset);
+		position.z = aux_position.z + i * (width*2 + offset);
 
 		for (int j = 0; j < 3; j++) 
 		{
-			if (placed >= num_buildings) break;
+			if (placed >= num_buildings) return;
 
-			pos.x = aux_pos.x + j * (width*2 + offset);
+			position.x = aux_position.x + j * (width*2 + offset);
 
 			if (margin > 1) 
 			{
 				if ((rand() + SDL_GetTicks()) % 2) margin--;
 				else {
-					CreateBuilding(pos, width, height);
+					CreateBuilding(position, width, height);
 					placed++;
 				}
 			}
 			else 
 			{
-				CreateBuilding(pos, width, height);
+				CreateBuilding(position, width, height);
 				placed++;
 			}
 		}
@@ -92,60 +141,60 @@ void ModuleSceneIntro::CreateBuilding(vec3 Position, float w, float h)
 	float z = w / 2;
 	int HeightBuilding = rand() % 4 + 2;
 
-	a.size = vec3(w, h, w);
+	Cube *a = new Cube();
+	a->size = vec3(w, h, w);
 
 	for (z; z <= w * 2; z = z + w) {
 		for (x; x <= w * 2; x = x + w) {
 			for (y; y <= h * HeightBuilding; y = y + h) {
-				a.SetPos(x + Position.x, y + Position.y, z + Position.z);
-				a.wire = false;
-				a.color = Red;
-				BuildingPhys_List.add(App->physics->AddBody(a, 50));
-				Building_List.add(&a);
+				a->SetPos(x + Position.x, y + Position.y, z + Position.z);
+				a->wire = false;
+				a->color = Red;
+				BuildingPhys_List.add(App->physics->AddBody(*a, 50));
+				Building_List.add(a);
 			}
 			y = h / 2;
 		}
 		x = w / 2;
 	}
-
 }
 
-void ModuleSceneIntro::CreateBuilding(vec3 Position) {
-
-	//sidewalk.SetPos();
-
-	float w = 5;
-	float h = 3;
-
-	float x = w / 2;
-	float y = h / 2;
-	float z = w / 2;
-	int HeightBuilding = rand() % 4 + 6;
-
-	sidewalk.size = vec3(w * 2+2, 0.2f, w * 2+2);
-	sidewalk.SetPos(w + Position.x, 0.2 / 2, w + Position.z);
-
-	
-	BuildingPhys_List.add(App->physics->AddBody(sidewalk, 500));
-	Building_List.add(&sidewalk);
-	//a.transform.scale(w,h,w);
-	a.size = vec3(w, h , w);
-
-	for (z; z <= w * 2; z = z + w) {
-		for (x; x <= w * 2; x = x + w) {
-			for (y; y <= h * HeightBuilding; y = y + h) {
-				a.SetPos(x+Position.x, y+Position.y, z+Position.z);
-				a.wire = false;
-				a.color = Red;
-				BuildingPhys_List.add(App->physics->AddBody(a, 50));
-				Building_List.add(&a);
-			}
-			y = h / 2;
-		}
-		x = w / 2;
-	}
-
-}
+//void ModuleSceneIntro::CreateBuilding(vec3 Position) {
+//
+//	//sidewalk.SetPos();
+//
+//	float w = 5;
+//	float h = 3;
+//
+//	float x = w / 2;
+//	float y = h / 2;
+//	float z = w / 2;
+//	int HeightBuilding = rand() % 4 + 6;
+//
+//	sidewalk.size = vec3(w * 2+2, 0.2f, w * 2+2);
+//	sidewalk.SetPos(w + Position.x, 0.2 / 2, w + Position.z);
+//
+//	
+//	BuildingPhys_List.add(App->physics->AddBody(sidewalk, 500));
+//	Building_List.add(&sidewalk);
+//	//a.transform.scale(w,h,w);
+//	a.size = vec3(w, h , w);
+//
+//	for (z; z <= w * 2; z = z + w) {
+//		for (x; x <= w * 2; x = x + w) {
+//			for (y; y <= h * HeightBuilding; y = y + h) {
+//				a.SetPos(x+Position.x, y+Position.y, z+Position.z);
+//				a.wire = false;
+//				a.color = Red;
+//				BuildingPhys_List.add(App->physics->AddBody(a, 50));
+//				Building_List.add(&a);
+//			}
+//			y = h / 2;
+//		}
+//		x = w / 2;
+//	}
+//
+//}
 
 // Load assets
 bool ModuleSceneIntro::CleanUp()
