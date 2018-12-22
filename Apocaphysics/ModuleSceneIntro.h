@@ -31,7 +31,7 @@ public:
 	*/
 
 	// Creates a block of maximum 9 buildings, randomly placed
-	void CreateBlock3x3(int num_buildings, float width, float height);
+	void CreateBlock3x3(vec3 pos, int num_buildings, float block_width, float block_height);
 
 	// Creates a plane building, without sidewalk
 	void CreateBuilding(vec3 Position, float w, float h);

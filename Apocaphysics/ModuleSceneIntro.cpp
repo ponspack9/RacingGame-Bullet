@@ -20,92 +20,61 @@ bool ModuleSceneIntro::Start()
 
 	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
 	App->camera->LookAt(vec3(0, 0, 0));
-	//Cube a;
+	
 
-
-	//float w = 3;
-	//float h = 3;
-
-	//int x = w/2;
-	//float y = h/2;
-	//int z = w/2;
-	//int size = rand()%4+6;
-
-	////a.transform.scale(w,h,w);
-	//a.size = (w, h, w);
-	//a.wire = true;
-	//for (z; z <= w * 2; z = z + w) {
-	//	for (x; x <= w * 2; x = x + w) {
-	//		for (y; y <= h * size; y = y + h) {
-	//			a.SetPos(x, y, z);
-	//			App->physics->AddBody(a, 5);
-	//		}
-	//		y = h / 2;
-	//	}
-	//	x = w / 2;
-	//}
-
-
-	//CreateBuilding(vec3(10,0,6));
-
-	//CreateBuilding(vec3(20, 0, 6));
-
-	//CreateBuilding(vec3(15, 0, 20));
-	//
-	//CreateBuilding(vec3(40, 0, 20));
-	//CreateBuilding(vec3(15, 0, 20));
-
-
-	//CreateBuilding(vec3(55, 0, 30));
-	//CreateBuilding(vec3(45, 0, 10));
-	//CreateBuilding(vec3(15, 0, 20));
-
-	//CreateBlock(8, 6, 4);
-	CreateBlock3x3(9, 6, 4);
+	CreateBlock3x3({ 20,0,30 },9, 5, 25);
 
 	return ret;
 }
 
-/* *Creates a block of buildings in a 3x3 grid
-   *Maximum 9 buildings
-   *Places it randomly */
-void ModuleSceneIntro::CreateBlock3x3(int num_buildings, float width, float height)
+/* * Creates a block of buildings in a 3x3 grid
+   * Maximum 9 buildings
+   * Building width and height depends on block size
+   * Places it randomly */
+void ModuleSceneIntro::CreateBlock3x3(vec3 pos, int num_buildings, float block_width, float block_height)
 {
 	if (num_buildings > 9) num_buildings = 9;
 
 	int margin = 9 - num_buildings;
 	int placed = 0;
 
-	float offset = 5;
-
-	vec3 pos = { 20,0,30 };
 	vec3 aux_pos = pos;
 
-	// Creating sidewalk
-	sidewalk.size = vec3(width * 9 + 2, 0.2f, width * 9  + 2);
-	sidewalk.SetPos(width*4 + pos.x, 0.2 / 2, width*4 + pos.z);
+	float offset = 5;
 
+	float width  = block_width  / 3;
+	float height = block_height / 3;
+
+
+	// Creating sidewalk
+	sidewalk.size = vec3(width * 9 + offset, 0.2f, width * 9  + offset);
+	sidewalk.SetPos(width*4.5f + pos.x, 0.2f / 2, width*4.5f + pos.z);
 
 	BuildingPhys_List.add(App->physics->AddBody(sidewalk, 500));
 	Building_List.add(&sidewalk);
 
+
 	// Randomly fills a imaginary 3x3 boolean matrix to place the buildings
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) 
+	{
 		pos.z = aux_pos.z + i * (width * 2 + offset);
 
-		for (int j = 0; j < 3; j++) {
-
+		for (int j = 0; j < 3; j++) 
+		{
 			if (placed >= num_buildings) break;
+
 			pos.x = aux_pos.x + j * (width * 2 + offset);
 
-			if (margin > 1) {
+			if (margin > 1) 
+			{
 				if ((rand() + SDL_GetTicks()) % 2) margin--;
 				else {
 					CreateBuilding(pos, width, height);
 					placed++;
 				}
 			}
-			else {
+			else 
+			{
 				CreateBuilding(pos, width, height);
 				placed++;
 			}
