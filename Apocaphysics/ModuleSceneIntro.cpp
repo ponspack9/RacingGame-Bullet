@@ -17,12 +17,12 @@ bool ModuleSceneIntro::Start()
 {
 	LOG("Loading Intro assets");
 	bool ret = true;
-
-	App->camera->Move(vec3(1.0f, 1.0f, 0.0f));
-	App->camera->LookAt(vec3(0, 0, 0));
+	
+	App->camera->Move(vec3(40.0f, 100.0f, 40.0f));
+	App->camera->LookAt(vec3(40.0f, 0.0f, 40.0f));
 	
 
-	CreateBlock3x3({ 20,0,30 },9, 5, 25);
+	CreateBlock3x3({ 20,0,30 },9, 11, 25);
 
 	return ret;
 }
@@ -40,15 +40,15 @@ void ModuleSceneIntro::CreateBlock3x3(vec3 pos, int num_buildings, float block_w
 
 	vec3 aux_pos = pos;
 
-	float offset = 5;
+	float offset = 10;
 
 	float width  = block_width  / 3;
 	float height = block_height / 3;
 
 
 	// Creating sidewalk
-	sidewalk.size = vec3(width * 9 + offset, 0.2f, width * 9  + offset);
-	sidewalk.SetPos(width*4.5f + pos.x, 0.2f / 2, width*4.5f + pos.z);
+	sidewalk.size = vec3(block_width*2 + offset*4, 0.2f, block_width*2 + offset*4);
+	sidewalk.SetPos(block_width + offset + pos.x, 0.2f / 2, block_width + offset + pos.z);
 
 	BuildingPhys_List.add(App->physics->AddBody(sidewalk, 500));
 	Building_List.add(&sidewalk);
@@ -57,13 +57,13 @@ void ModuleSceneIntro::CreateBlock3x3(vec3 pos, int num_buildings, float block_w
 	// Randomly fills a imaginary 3x3 boolean matrix to place the buildings
 	for (int i = 0; i < 3; i++) 
 	{
-		pos.z = aux_pos.z + i * (width * 2 + offset);
+		pos.z = aux_pos.z + i * (width*2 + offset);
 
 		for (int j = 0; j < 3; j++) 
 		{
 			if (placed >= num_buildings) break;
 
-			pos.x = aux_pos.x + j * (width * 2 + offset);
+			pos.x = aux_pos.x + j * (width*2 + offset);
 
 			if (margin > 1) 
 			{
