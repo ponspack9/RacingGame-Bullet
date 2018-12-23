@@ -31,7 +31,7 @@ public:
 	*/
 
 	// Creates a city with random 3x3 blocks
-	void CreateCity(int num_blocks, float max_width, vec3 pos = { 0,0,0 },float buildings_offset = 5.0f);
+	void CreateCity(float max_width, vec3 pos = { 0,0,0 },float buildings_offset = 5.0f);
 
 	// Creates a block of maximum 9 buildings, randomly placed
 	void CreateBlock3x3(const vec3 &pos, int num_buildings, const float &block_width, const float &block_height, const float &block_depth, const float &offset);
@@ -39,10 +39,7 @@ public:
 	// Creates a plane building, without sidewalk
 	void CreateBuilding(const vec3 &Position, const float &w, const float &h, const float &d);
 
-	//void CreateBuilding(vec3 Position);
-
-	//Cube a;
-	//Cube sidewalk;
+	int total_city_cubes;
 
 	p2List<Cube*> Building_List;
 	p2List<PhysBody3D*>BuildingPhys_List;
