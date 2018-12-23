@@ -34,10 +34,10 @@ public:
 	void CreateCity(int num_blocks, float max_width, vec3 pos = { 0,0,0 },float buildings_offset = 5.0f);
 
 	// Creates a block of maximum 9 buildings, randomly placed
-	void CreateBlock3x3(const vec3 &pos, int num_buildings, const float &block_width, const float &block_height, const float &offset);
+	void CreateBlock3x3(const vec3 &pos, int num_buildings, const float &block_width, const float &block_height, const float &block_depth, const float &offset);
 
 	// Creates a plane building, without sidewalk
-	void CreateBuilding(vec3 Position, float w, float h);
+	void CreateBuilding(const vec3 &Position, const float &w, const float &h, const float &d);
 
 	//void CreateBuilding(vec3 Position);
 

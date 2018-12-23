@@ -37,40 +37,78 @@ void ModuleSceneIntro::CreateCity(int num_blocks,float max_width, vec3 pos, floa
 
 	int n_buildings = 5;
 	int placed = 0;
+
 	float block_width = 10;
 	float block_height = 10;
+	float block_depth = 10;
 
-	int x_left = max_width;
-	float z_left = max_width;
 	float road_offset = 10.0f;
 
 	vec3 aux_pos = pos;
 
-	for (int i = 0; i < num_blocks; i++) 
+	float positions[15][15] = { 0.0f };
+
+	int j = 0;
+	int i = 0;
+
+	// First bucle stands for x block creation
+	while (pos.x <= max_width)
 	{
-		if (placed >= num_blocks) return;
-
 		//Defining next block
-		n_buildings = (rand()+SDL_GetTicks()) % 9 +1;
-		block_width = (rand() % 15) + 10.0f;
-		//block_height = rand() % 10 + 5;
-		//x_left -= (block_width + road_offset);
+		n_buildings = (rand() + SDL_GetTicks()) % 9 + 1;
+		//block_width = (rand() % 15) + 10.0f;
+		//block_depth = (rand() % 15) + 10.0f;
 
-		CreateBlock3x3(pos, n_buildings, block_width, block_height, buildings_offset);
-
+		CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
 		placed++;
-		pos.x += block_width * 2 + buildings_offset *4 + road_offset;
 
-		if (pos.x >= max_width) {
-			pos.x = aux_pos.x;
-			pos.z += block_width * 2 + buildings_offset * 4 + road_offset;
-			if (pos.z >= max_width) {
-				LOG("City limits exceeded, blocks remaining to place: %d", num_blocks-placed);
-				return;
-			}
+		//if (j<=0) pos.z += block_depth * 2 + buildings_offset * 4 + road_offset;
+
+		// For each block created on x axis, the following blocks in z axis must respect its width
+		while (pos.z <= max_width) {
+
+			pos.z += block_depth * 2 + buildings_offset * 4 + road_offset;
+			CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
+			//block_depth = (rand() % 15) + 10.0f;
+			j++;
+
 		}
-
+		pos.z = aux_pos.z;
+		pos.x += block_width * 2 + buildings_offset * 4 + road_offset;
+		i++;
 	}
+
+
+
+
+	//for (int i = 0; i < num_blocks; i++)
+	//{
+	//	if (placed >= num_blocks) return;
+
+	//	//Defining next block
+	//	n_buildings = (rand() + SDL_GetTicks()) % 9 + 1;
+	//	block_width = (rand() % 15) + 10.0f;
+	//	block_depth = block_width;
+
+	//	CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
+
+	//	placed++;
+	//	pos.x += block_width * 2 + buildings_offset * 4 + road_offset;
+	//	positions[i][j] = pos.x;
+
+	//	if (pos.x >= max_width) {
+	//		pos.x = aux_pos.x;
+	//		pos.z += block_width * 2 + buildings_offset * 4 + road_offset;
+	//		j++;
+	//		if (pos.z >= max_width) {
+	//			LOG("City limits exceeded, blocks remaining to place: %d", num_blocks - placed);
+	//			return;
+	//		}
+	//	}
+
+	//}
+
+	
 
 
 }
@@ -79,7 +117,7 @@ void ModuleSceneIntro::CreateCity(int num_blocks,float max_width, vec3 pos, floa
    * Maximum 9 buildings
    * Building width and height depends on block size
    * Places it randomly */
-void ModuleSceneIntro::CreateBlock3x3(const vec3 &pos, int num_buildings, const float &block_width, const float &block_height, const float &offset)
+void ModuleSceneIntro::CreateBlock3x3(const vec3 &pos, int num_buildings, const float &block_width, const float &block_height, const float &block_depth, const float &offset)
 {
 	if (num_buildings > 9) num_buildings = 9;
 	
@@ -92,7 +130,8 @@ void ModuleSceneIntro::CreateBlock3x3(const vec3 &pos, int num_buildings, const 
 
 	float width  = block_width  / 3;
 	float height = block_height / 3;
-	
+	float depth  = block_depth  / 3;
+
 	Cube *sidewalk = new Cube();
 
 	// Creating sidewalk
@@ -118,13 +157,13 @@ void ModuleSceneIntro::CreateBlock3x3(const vec3 &pos, int num_buildings, const 
 			{
 				if ((rand() + SDL_GetTicks()) % 2) margin--;
 				else {
-					CreateBuilding(position, width, height);
+					CreateBuilding(position, width, height, depth);
 					placed++;
 				}
 			}
 			else 
 			{
-				CreateBuilding(position, width, height);
+				CreateBuilding(position, width, height,depth);
 				placed++;
 			}
 		}
@@ -133,18 +172,18 @@ void ModuleSceneIntro::CreateBlock3x3(const vec3 &pos, int num_buildings, const 
 }
 
 
-void ModuleSceneIntro::CreateBuilding(vec3 Position, float w, float h) 
+void ModuleSceneIntro::CreateBuilding(const vec3 &Position, const float &w, const float &h, const float &d)
 {
 
 	float x = w / 2;
 	float y = h / 2;
-	float z = w / 2;
+	float z = d / 2;
 	int HeightBuilding = rand() % 4 + 2;
 
 	Cube *a = new Cube();
 	a->size = vec3(w, h, w);
 
-	for (z; z <= w * 2; z = z + w) {
+	for (z; z <= d * 2; z = z + d) {
 		for (x; x <= w * 2; x = x + w) {
 			for (y; y <= h * HeightBuilding; y = y + h) {
 				a->SetPos(x + Position.x, y + Position.y, z + Position.z);
