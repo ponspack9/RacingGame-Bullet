@@ -8,6 +8,7 @@
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	total_city_cubes = 0;
+	game_started = false;
 }
 
 ModuleSceneIntro::~ModuleSceneIntro()
@@ -181,6 +182,15 @@ update_status ModuleSceneIntro::Update(float dt)
 		BuildingsPhys->data->GetTransform(&Buildings->data->transform);
 		Buildings->data->Render();
 		BuildingsPhys = BuildingsPhys->next;
+	}
+
+	if (App->input->GetKey(SDL_SCANCODE_RETURN) == KEY_REPEAT)
+	{
+		if (!game_started) {
+			game_started = true;
+			main_timer.Start();
+
+		}
 	}
 
 	

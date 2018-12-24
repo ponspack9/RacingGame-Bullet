@@ -55,4 +55,8 @@ public:
 
 	PhysMotor3D* left_wheel;
 	PhysMotor3D* right_wheel;
+
+	bool game_started;
+
+	Timer main_timer;
 };

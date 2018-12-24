@@ -15,6 +15,7 @@ public:
 	void Stop();
 
 	Uint32 Read();
+	float ReadSeconds();
 
 private:
 

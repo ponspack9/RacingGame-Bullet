@@ -115,41 +115,46 @@ update_status ModulePlayer::Update(float dt)
 {
 	turn = acceleration = brake = 0.0f;
 
-	App->camera->Position = vehicle->Position() - vehicle->GoingForward() * 10 + vec3(0, 200, 0);
-	//App->camera->Position=vehicle->Position() - vehicle->GoingForward()*10 + vec3(0,5,0);
-	//App->camera->LookAt(vehicle->Position());
+	char *c = "PRESS ENTER TO PLAY";
 
-	if(App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
-	{
-		if (vehicle->GetKmh() < 0) {
-			brake = BRAKE_POWER / 5;
+	//App->camera->Position = vehicle->Position() - vehicle->GoingForward() * 10 + vec3(0, 200, 0);
+	App->camera->Position=vehicle->Position() - vehicle->GoingForward()*10 + vec3(0,5,0);
+	App->camera->LookAt(vehicle->Position());
+
+	if (App->scene_intro->game_started) {
+
+		c = "";
+		if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
+		{
+			if (vehicle->GetKmh() < 0) {
+				brake = BRAKE_POWER / 5;
+			}
+			else
+				acceleration = MAX_ACCELERATION;
+
 		}
-		else
-			acceleration = MAX_ACCELERATION;
-		
-	}
 
-	
-	if(App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
-	{
-		if(turn < TURN_DEGREES)
-			turn +=  TURN_DEGREES;
-	}
+		if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
+		{
+			if (turn < TURN_DEGREES)
+				turn += TURN_DEGREES;
+		}
 
-	if(App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
-	{
-		if(turn > -TURN_DEGREES)
-			turn -= TURN_DEGREES;
-	}
+		if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
+		{
+			if (turn > -TURN_DEGREES)
+				turn -= TURN_DEGREES;
+		}
 
-	if(App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
-	{
-		if (vehicle->GetKmh() >= 0)
-			brake = BRAKE_POWER;
-		else
-			acceleration = -MAX_ACCELERATION/2;
+		if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
+		{
+			if (vehicle->GetKmh() >= 0)
+				brake = BRAKE_POWER;
+			else
+				acceleration = -MAX_ACCELERATION / 2;
 
-		
+
+		}
 	}
 
 	vehicle->ApplyEngineForce(acceleration);
@@ -159,7 +164,7 @@ update_status ModulePlayer::Update(float dt)
 	vehicle->Render();
 
 	char title[80];
-	sprintf_s(title, "%.1f Km/h  Total cubes: %d", vehicle->GetKmh(),App->scene_intro->total_city_cubes);
+	sprintf_s(title, "%.1f Km/h  Total cubes: %d Time left: %f %s", vehicle->GetKmh(),App->scene_intro->total_city_cubes, 60.0f - App->scene_intro->main_timer.ReadSeconds(),c);
 	App->window->SetTitle(title);
 
 	return UPDATE_CONTINUE;

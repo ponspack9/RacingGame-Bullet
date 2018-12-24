@@ -8,7 +8,9 @@
 // ---------------------------------------------
 Timer::Timer()
 {
-	Start();
+	//Start();
+	started_at = 0;
+	stopped_at = 0;
 }
 
 // ---------------------------------------------
@@ -36,6 +38,11 @@ Uint32 Timer::Read()
 	{
 		return stopped_at - started_at;
 	}
+}
+
+float Timer::ReadSeconds()
+{
+	return (Read() * 0.001f);
 }
 
 
