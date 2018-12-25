@@ -161,6 +161,7 @@ void Cube::InnerRender() const
 Sphere::Sphere() : Primitive(), radius(1.0f)
 {
 	type = PrimitiveTypes::Primitive_Sphere;
+	time = 0;
 }
 
 Sphere::Sphere(float radius) : Primitive(), radius(radius)
