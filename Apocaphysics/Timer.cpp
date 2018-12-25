@@ -8,7 +8,9 @@
 // ---------------------------------------------
 Timer::Timer()
 {
-	Start();
+	//Start();
+	started_at = 0;
+	stopped_at = 0;
 }
 
 // ---------------------------------------------
@@ -25,6 +27,13 @@ void Timer::Stop()
 	stopped_at = SDL_GetTicks();
 }
 
+void Timer::Reset() 
+{
+	running = false;
+	started_at = 0;
+	stopped_at = 0;
+}
+
 // ---------------------------------------------
 Uint32 Timer::Read()
 {
@@ -36,6 +45,16 @@ Uint32 Timer::Read()
 	{
 		return stopped_at - started_at;
 	}
+}
+
+float Timer::ReadSeconds()
+{
+	return (Read() * 0.001f);
+}
+
+bool Timer::IsRunning() 
+{
+	return running;
 }
 
 

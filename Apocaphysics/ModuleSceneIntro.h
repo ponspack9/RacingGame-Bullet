@@ -31,11 +31,16 @@ public:
 	Sphere s_snake2[MAX_SNAKE];
 	*/
 
+	// Creates a city with random 3x3 blocks
+	void CreateCity(float max_width, vec3 pos = { 0,0,0 },float buildings_offset = 5.0f);
 
-	void CreateBuilding(vec3 Position);
+	// Creates a block of maximum 9 buildings, randomly placed
+	void CreateBlock3x3(const vec3 &pos, int num_buildings, const float &block_width, const float &block_height, const float &block_depth, const float &offset);
 
-	Cube a;
-	Cube Acera;
+	// Creates a plane building, without sidewalk
+	void CreateBuilding(const vec3 &Position, const float &w, const float &h, const float &d);
+
+	int total_city_cubes;
 
 	p2List<Cube*> Building_List;
 	p2List<PhysBody3D*>BuildingPhys_List;
@@ -56,4 +61,8 @@ public:
 
 	PhysMotor3D* left_wheel;
 	PhysMotor3D* right_wheel;
+
+	bool game_started;
+
+	Timer main_timer;
 };
