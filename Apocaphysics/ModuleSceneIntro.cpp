@@ -26,12 +26,12 @@ bool ModuleSceneIntro::Start()
 	plane_Ground=Cube(600.0f, 0.2f,600.f);
 	plane_Ground.wire = false;
 	plane_Ground.color = Grey;
-
-	plane_Ground.SetPos(0, 0, 0);
+	
+	plane_Ground.SetPos(0, -2, 0);
 	Ground=App->physics->AddBody(plane_Ground,10000);
 	Ground->type = GROUND;
   
-	CreateCity(300, { -100,0,-50 });
+	CreateCity(200, { -100,0,-50 });
  
 	return ret;
 }
@@ -106,7 +106,7 @@ void ModuleSceneIntro::CreateBlock3x3(const vec3 &pos, int num_buildings, const 
 	sidewalk->size = vec3(block_width*2 + offset*4, 0.2f, block_depth*2 + offset*4);
 	sidewalk->SetPos(block_width + offset + position.x, 0.2f / 2, block_depth + offset + position.z);
 	
-	BuildingPhys_List.add(App->physics->AddBody(*sidewalk, 500));
+	BuildingPhys_List.add(App->physics->AddBody(*sidewalk, 9999));
 	Building_List.add(sidewalk);
 
 
