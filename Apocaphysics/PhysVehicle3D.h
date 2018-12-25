@@ -5,7 +5,9 @@
 
 class btRaycastVehicle;
 struct PhysBody3D;
-
+class Cylinder;
+class Cube;
+ 
 struct Wheel
 {
 	vec3 connection; // origin of the ray. Must come from within the chassis
@@ -26,6 +28,15 @@ struct VehicleInfo
 	
 	vec3 chassis_size;
 	vec3 chassis_offset;
+	vec3 Additional_Piece1_offset;
+	vec3 Additional_Piece1;
+	vec3 Misiles_Left;
+	vec3 Misiles_Left_Offset;
+	vec3 Misiles_Right;
+	vec3 Misiles_Right_Offset;
+
+
+
 	float mass;
 	float suspensionStiffness; // default to 5.88 / 10.0 offroad / 50.0 sports car / 200.0 F1 car
 	float suspensionCompression; // default to 0.83
@@ -36,6 +47,8 @@ struct VehicleInfo
 
 	Wheel* wheels;
 	int num_wheels;
+
+	Cube* Missiles_Left_Point;
 };
 
 
@@ -47,11 +60,14 @@ public:
 
 	void Render();
 	vec3 Position();
+	vec3 Misiles_leftPos();
+	vec3 Misiles_RightPos();
 	void ApplyEngineForce(float force);
 	vec3 GoingForward();
 	void Brake(float force);
 	void Turn(float degrees);
 	float GetKmh() const;
+
 public:
 
 	VehicleInfo info;

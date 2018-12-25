@@ -1,7 +1,10 @@
 
 #pragma once
 #include "glmath.h"
+#include "p2List.h"
 #include "Color.h"
+
+
 
 enum PrimitiveTypes
 {
@@ -54,8 +57,10 @@ public:
 	Sphere();
 	Sphere(float radius);
 	void InnerRender() const;
+	p2List<Cube*>Gas;
 public:
 	float radius;
+	int time=0;
 };
 
 // ============================================
