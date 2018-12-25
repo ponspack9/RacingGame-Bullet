@@ -155,6 +155,23 @@ update_status ModulePlayer::Update(float dt)
 
 
 		}
+
+		if (vehicle->GetKmh() <= 5.0f) {
+			if (!no_velocity_timer.IsRunning()) no_velocity_timer.Start();
+			c = "TIMER ON";
+		}
+		else {
+			no_velocity_timer.Reset();
+		}
+
+		if (no_velocity_timer.ReadSeconds() >= 5.0f) {
+			App->scene_intro->game_started = false;
+			App->scene_intro->main_timer.Reset();
+			no_velocity_timer.Reset();
+			c = "YOU LOSE";
+		}
+
+		// END PLAYING CONDITION
 	}
 
 	vehicle->ApplyEngineForce(acceleration);
@@ -166,6 +183,9 @@ update_status ModulePlayer::Update(float dt)
 	char title[80];
 	sprintf_s(title, "%.1f Km/h  Total cubes: %d Time left: %f %s", vehicle->GetKmh(),App->scene_intro->total_city_cubes, 60.0f - App->scene_intro->main_timer.ReadSeconds(),c);
 	App->window->SetTitle(title);
+
+	
+
 
 	return UPDATE_CONTINUE;
 }

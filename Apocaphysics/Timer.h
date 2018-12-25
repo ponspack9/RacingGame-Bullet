@@ -14,8 +14,12 @@ public:
 	void Start();
 	void Stop();
 
+	void Reset();
+
 	Uint32 Read();
 	float ReadSeconds();
+
+	bool IsRunning();
 
 private:
 

@@ -26,4 +26,6 @@ public:
 	float turn;
 	float acceleration;
 	float brake;
+
+	Timer no_velocity_timer;
 };
