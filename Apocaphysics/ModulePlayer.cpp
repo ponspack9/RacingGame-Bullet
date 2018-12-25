@@ -16,13 +16,13 @@ ModulePlayer::~ModulePlayer()
 // Load assets
 bool ModulePlayer::Start()
 {
-	LOG("Loading player");
 
+	LOG("Loading player");
 	VehicleInfo car;
 
 	// Car properties ----------------------------------------
-	car.chassis_size.Set(2, 2, 4);
-	car.chassis_offset.Set(0, 1.5, 0);
+	car.chassis_size.Set(2, 1.5f, 4);
+	car.chassis_offset.Set(0, 0.5f, 0);
 	car.mass = 500.0f;
 	car.suspensionStiffness = 15.88f;
 	car.suspensionCompression = 0.83f;
@@ -30,16 +30,28 @@ bool ModulePlayer::Start()
 	car.maxSuspensionTravelCm = 1000.0f;
 	car.frictionSlip = 50.5;
 	car.maxSuspensionForce = 6000.0f;
+	//Decoration
+
+	car.Additional_Piece1.Set(2, 1.0f, 1);
+	car.Additional_Piece1_offset.Set(0, 0, -2);
+
+	//MISILES
+
+	car.Misiles_Left.Set(0.7,0.7,3);
+	car.Misiles_Left_Offset.Set(1.35, 1.4, -0.9);
+
+	car.Misiles_Right.Set(0.7, 0.7, 3);
+	car.Misiles_Right_Offset.Set(-1.35, 1.4, -0.9);
 
 	// Wheel properties ---------------------------------------
-	float connection_height = 1.2f;
-	float wheel_radius = 0.6f;
+	float connection_height = 1.2f;//1.2
+	float wheel_radius = 0.9f;
 	float wheel_width = 0.5f;
 	float suspensionRestLength = 1.2f;
 
 	// Don't change anything below this line ------------------
 
-	float half_width = car.chassis_size.x*0.5f;
+	float half_width = car.chassis_size.x*0.8f;
 	float half_length = car.chassis_size.z*0.5f;
 	
 	vec3 direction(0,-1,0);
@@ -95,10 +107,10 @@ bool ModulePlayer::Start()
 	car.wheels[3].drive = false;
 	car.wheels[3].brake = true;
 	car.wheels[3].steering = false;
-
-	vehicle = App->physics->AddVehicle(car);
-	vehicle->SetPos(30, 12, 10);
 	
+	vehicle = App->physics->AddVehicle(car);
+	vehicle->SetPos(40, 1, 10);
+
 	return true;
 }
 
@@ -110,6 +122,43 @@ bool ModulePlayer::CleanUp()
 	return true;
 }
 
+
+
+void ModulePlayer::Shoot() {
+
+	float force = 8000.0f;
+
+	if (shootLeft) {
+		Sphere* Left = new Sphere(0.4);
+		Left->wire = false;
+		Left->color = Blue;
+		
+		vec3 aux = vehicle->Misiles_leftPos();
+		Left->SetPos(aux.x, aux.y - 5, aux.z);
+		Shooot_List.add(Left);
+		
+		ShootPhys_List.add(App->physics->AddBody(*Left, 50,MISSILE));
+		ShootPhys_List.getLast()->data->Push(-(App->camera->Z.x * force), -(App->camera->Z.y * force), -(App->camera->Z.z * force));
+		shootLeft = false;
+		ShootRight = true;
+	}
+	else if (ShootRight) {
+		Sphere* Right = new Sphere(0.4);
+		Right->wire = false;
+		Right->color = Blue;
+
+		vec3 aux2 = vehicle->Misiles_RightPos();
+		Right->SetPos(aux2.x, aux2.y - 5, aux2.z);
+		Shooot_List.add(Right);
+		ShootPhys_List.add(App->physics->AddBody(*Right, 50,MISSILE));
+		ShootPhys_List.getLast()->data->Push(-(App->camera->Z.x * force), -(App->camera->Z.y * force), -(App->camera->Z.z * force));
+		shootLeft = true;
+		ShootRight = false;
+	}
+
+}
+
+
 // Update: draw background
 update_status ModulePlayer::Update(float dt)
 {
@@ -117,7 +166,6 @@ update_status ModulePlayer::Update(float dt)
 
 	char *c = "PRESS ENTER TO PLAY";
 
-	//App->camera->Position = vehicle->Position() - vehicle->GoingForward() * 10 + vec3(0, 200, 0);
 	App->camera->Position=vehicle->Position() - vehicle->GoingForward()*10 + vec3(0,5,0);
 	App->camera->LookAt(vehicle->Position());
 
@@ -139,6 +187,9 @@ update_status ModulePlayer::Update(float dt)
 			if (turn < TURN_DEGREES)
 				turn += TURN_DEGREES;
 		}
+	  if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN) {
+		Shoot();
+	  }
 
 		if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 		{
@@ -172,6 +223,42 @@ update_status ModulePlayer::Update(float dt)
 		}
 
 		// END PLAYING CONDITION
+	}
+
+
+	p2List_item<PhysBody3D*>*Missiles_Phys = ShootPhys_List.getFirst();
+	p2List_item<Sphere*>*Missiles = Shooot_List.getFirst();
+
+	for (; Missiles != nullptr; Missiles = Missiles->next) {
+		if (Missiles->data != nullptr) {
+			Cube* Gas = new Cube(0.9f,0.9f,0.9f);
+			int a = (rand() % 3)-1;
+			Gas->SetPos(Missiles_Phys->data->GetPosition().x+a, Missiles_Phys->data->GetPosition().y+a, Missiles_Phys->data->GetPosition().z+a);
+			Missiles->data->Gas.add(Gas);
+			p2List_item<Cube*>*Gas_Particle = Missiles->data->Gas.getFirst();
+			for (; Gas_Particle != nullptr; Gas_Particle = Gas_Particle->next) {
+				Gas_Particle->data->Scale(Gas_Particle->data->size.x, Gas_Particle->data->size.y, Gas_Particle->data->size.z);
+				Gas_Particle->data->size.x += 0.08;
+				Gas_Particle->data->size.y += 0.08;
+				Gas_Particle->data->size.z += 0.08;
+				Gas_Particle->data->Render();
+			}
+			if (Missiles->data->Gas.count() >= 10) {
+				Gas_Particle = Missiles->data->Gas.getFirst();
+				Missiles->data->Gas.del(Missiles->data->Gas.getFirst());
+			}
+			Missiles_Phys->data->GetTransform(&Missiles->data->transform);
+			Missiles->data->Render();
+			Missiles->data->time++;
+		}
+		if (Missiles->data->time >= 50) {
+			Missiles->data->Gas.clear();
+			ShootPhys_List.del(Missiles_Phys);
+			Shooot_List.del(Missiles);
+			break;
+		}
+
+		Missiles_Phys = Missiles_Phys->next;
 	}
 
 	vehicle->ApplyEngineForce(acceleration);

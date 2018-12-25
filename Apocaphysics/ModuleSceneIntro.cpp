@@ -22,9 +22,17 @@ bool ModuleSceneIntro::Start()
 	
 	App->camera->Move(vec3(40.0f, 200.0f, 40.0f));
 	App->camera->LookAt(vec3(40.0f, 0.0f, 40.0f));
-	
-	CreateCity(300, { -100,0,-50 });
+  
+	plane_Ground=Cube(600.0f, 0.2f,600.f);
+	plane_Ground.wire = false;
+	plane_Ground.color = Grey;
 
+	plane_Ground.SetPos(0, 0, 0);
+	Ground=App->physics->AddBody(plane_Ground,10000);
+	Ground->type = GROUND;
+  
+	CreateCity(300, { -100,0,-50 });
+ 
 	return ret;
 }
 
@@ -146,10 +154,13 @@ void ModuleSceneIntro::CreateBuilding(const vec3 &Position, const float &w, cons
 	for (z; z <= d * 2; z = z + d) {
 		for (x; x <= w * 2; x = x + w) {
 			for (y; y <= h * HeightBuilding; y = y + h) {
+        
 				a->SetPos(x + Position.x, y + Position.y, z + Position.z);
 				a->wire = false;
 				a->color = Red;
 				BuildingPhys_List.add(App->physics->AddBody(*a, 50));
+        BuildingPhys_List.getLast()->data->type = BUILDING;
+				BuildingPhys_List.getLast()->data->collision_listeners.add(App->scene_intro);
 				Building_List.add(a);
 				total_city_cubes++;
 			}
@@ -171,16 +182,32 @@ bool ModuleSceneIntro::CleanUp()
 update_status ModuleSceneIntro::Update(float dt)
 {
 
-	Plane p(0, 1, 0, 0);
-	p.axis = true;
-	p.Render();
 
-	p2List_item<Cube*>*Buildings=Building_List.getFirst();
+
+	//p.wire = false;
+	//p.color = Grey;
+	//p.Scale(200, 0, 200);
+	////p.axis = true;
+	//p.Render();
+
+	plane_Ground.Render();
+
+
+
 	p2List_item<PhysBody3D*>*BuildingsPhys = BuildingPhys_List.getFirst();
+	p2List_item<Cube*>*Buildings=Building_List.getFirst();
 
 	for (; Buildings != nullptr; Buildings = Buildings->next) {
+		if (BuildingsPhys->data->toDelete == true) {
+			BuildingsPhys->data->count++;
+			if (BuildingsPhys->data->count >= 70) {
+				BuildingsPhys->data->SetPos(5000, -200, 0);
+				BuildingsPhys->data->toDelete = false;
+			}
+		}
 		BuildingsPhys->data->GetTransform(&Buildings->data->transform);
 		Buildings->data->Render();
+		
 		BuildingsPhys = BuildingsPhys->next;
 	}
 
@@ -200,5 +227,32 @@ update_status ModuleSceneIntro::Update(float dt)
 
 void ModuleSceneIntro::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 {
+	if (body1->type == GROUND&&body2->type == BUILDING || body2->type == GROUND&&body1->type == BUILDING) {
+		if (body1->type == BUILDING) {
+			p2List_item<PhysBody3D*>*BuildingsPhys = BuildingPhys_List.getFirst();
+			p2List_item<Cube*>*Buildings = Building_List.getFirst();
+
+			for (; BuildingsPhys != nullptr; BuildingsPhys = BuildingsPhys->next) {
+				if (BuildingsPhys->data == body1) {
+					BuildingsPhys->data->toDelete = true;
+					//delete BuildingsPhys->data;
+					break;
+				}
+				Buildings = Buildings->next;
+			}
+		}
+		else if (body2->type == BUILDING) {
+			p2List_item<PhysBody3D*>*BuildingsPhys = BuildingPhys_List.getFirst();
+			p2List_item<Cube*>*Buildings = Building_List.getFirst();
+
+			for (; BuildingsPhys != nullptr; BuildingsPhys = BuildingsPhys->next) {
+				if (BuildingsPhys->data == body2) {
+					BuildingsPhys->data->toDelete = true;
+					break;
+				}
+				Buildings = Buildings->next;
+			}
+		}
+	}
 }
 

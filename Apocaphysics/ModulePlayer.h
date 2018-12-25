@@ -19,7 +19,18 @@ public:
 	update_status Update(float dt);
 	bool CleanUp();
 
+	void Shoot();
+	bool isShooting = false;
+
+	bool shootLeft = true;
+	bool ShootRight = false;
+
+	p2List<Sphere*> Shooot_List;
+	p2List<PhysBody3D*>ShootPhys_List;
+
+
 public:
+
 
 	PhysVehicle3D* vehicle;
 

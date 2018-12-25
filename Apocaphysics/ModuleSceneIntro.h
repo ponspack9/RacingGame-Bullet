@@ -8,6 +8,7 @@
 
 struct PhysBody3D;
 struct PhysMotor3D;
+class Plane;
 
 class ModuleSceneIntro : public Module
 {
@@ -52,6 +53,11 @@ public:
 
 	PhysBody3D* pb_wheel2;
 	Cylinder p_wheel2;
+
+
+	Cube plane_Ground;
+
+	PhysBody3D*Ground;
 
 	PhysMotor3D* left_wheel;
 	PhysMotor3D* right_wheel;
