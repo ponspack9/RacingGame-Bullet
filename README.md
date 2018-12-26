@@ -10,7 +10,7 @@ This game was developed by students Roger Leon and Òscar Pons for Physics II su
 - LEFT  	-> turn left
 - RIGHT     -> turn right
 - SPACE     -> shoot missiles
-- UNNKOWN   -> car boost
+- CONTROL   -> car boost
 
 - RETURN -> start playing
 - R -> reset car rotation  
@@ -30,6 +30,7 @@ Accelerate as much as you can, remember to avoid hitting streetlights, they will
 
 ### Debug Keys
 
+- F2 -> freely move camera (ASWD + Right mouse button)
 - F3 -> restart game
 
 - ESC -> quit game
