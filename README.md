@@ -40,6 +40,8 @@ Accelerate as much as you can, remember to avoid hitting streetlights, they will
 - F3 -> restart game
 - F5 -> Decrease volume
 - F6 -> Increase volume
+- F7 -> Decrease volume Fx
+- F8 -> Increase volume Fx
 - ESC -> quit game
 
 ## Game Special Details
