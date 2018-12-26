@@ -330,7 +330,7 @@ update_status ModuleSceneIntro::Update(float dt)
 			main_timer.Start();
 		}
 	}
-	if (App->input->GetKey(SDL_SCANCODE_T) == KEY_DOWN)
+	if (App->input->GetKey(SDL_SCANCODE_F3) == KEY_DOWN)
 	{
 		reStart();
 	}

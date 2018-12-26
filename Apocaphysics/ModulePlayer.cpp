@@ -213,7 +213,7 @@ update_status ModulePlayer::Update(float dt)
 		if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN) {
 			Shoot();
 		}
-		if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN) {
+		if (App->input->GetKey(SDL_SCANCODE_F2) == KEY_DOWN) {
 			float angle = vehicle->IntitialRot.angle(vehicle->vehicle->getForwardVector());
 			vehicle->Rotate(vec3(0, 1, 0), -angle, false);
 		}
