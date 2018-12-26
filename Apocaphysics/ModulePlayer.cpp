@@ -9,6 +9,7 @@
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled) : Module(app, start_enabled), vehicle(NULL)
 {
 	turn = acceleration = brake = 0.0f;
+
 }
 
 ModulePlayer::~ModulePlayer()
@@ -21,7 +22,7 @@ bool ModulePlayer::Start()
 	ScaleTime = 0;
 	LOG("Loading player");
 	VehicleInfo car;	
-	
+	debug_fly_around = false;
 
 
 	// Car properties ----------------------------------------
@@ -181,12 +182,13 @@ update_status ModulePlayer::Update(float dt)
 
 	char *c = "PRESS ENTER TO PLAY";
 
-
-	if (App->camera->DoCameraShake == false) {
-		App->camera->Position = vehicle->GetPosition()- vehicle->GoingForward() * 10 + vec3(0, 5, 0);
+	if (debug_fly_around == false) {
+		if (App->camera->DoCameraShake == false) {
+			App->camera->Position = vehicle->GetPosition() - vehicle->GoingForward() * 10 + vec3(0, 5, 0);
+		}
+		App->camera->LookAt(vehicle->Position());
 	}
 
-	App->camera->LookAt(vehicle->Position());
 	if (App->scene_intro->game_started) {
 
 		c = "";
@@ -303,7 +305,7 @@ update_status ModulePlayer::Update(float dt)
 	vehicle->Render();
 
 	char title[256];
-	sprintf_s(title, "%.1f Km/h  Total cubes: %d Total cubes killed: %d Time left: %0.2f %s COMPLETED: %d%c", vehicle->GetKmh(),App->scene_intro->total_city_cubes,App->scene_intro->cubes_destroyed, (App->scene_intro->main_timer.IsRunning())? 60.0f - App->scene_intro->main_timer.ReadSeconds():0.0f,c, int(App->scene_intro->cubes_destroyed*100/App->scene_intro->total_city_cubes),'%');
+	sprintf_s(title, "%.1f Km/h  Total cubes: %d Total cubes killed: %d Time left: %0.2f %s DESTROYED: %d%c", vehicle->GetKmh(),App->scene_intro->total_city_cubes,App->scene_intro->cubes_destroyed, (App->scene_intro->main_timer.IsRunning())? 60.0f - App->scene_intro->main_timer.ReadSeconds():0.0f,c, int(App->scene_intro->cubes_destroyed*100/App->scene_intro->total_city_cubes),'%');
 	App->window->SetTitle(title);
 
 	

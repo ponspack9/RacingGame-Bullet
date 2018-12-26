@@ -40,4 +40,6 @@ public:
 	float brake;
 
 	Timer no_velocity_timer;
+
+	bool debug_fly_around;
 };

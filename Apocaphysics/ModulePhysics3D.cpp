@@ -127,23 +127,6 @@ update_status ModulePhysics3D::Update(float dt)
 			item->data->Render();
 			item = item->next;
 		}
-
-		if(App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
-		{
-			Sphere s(1);
-			s.SetPos(App->camera->Position.x, App->camera->Position.y, App->camera->Position.z);
-			float force = 500.0f;
-			AddBody(s,50)->Push(-(App->camera->Z.x * force), -(App->camera->Z.y * force), -(App->camera->Z.z * force));
-
-		}
-		//if (App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
-		//{
-		//	Cube a;
-		//	a.SetPos(App->camera->Position.x, App->camera->Position.y, App->camera->Position.z);
-		//	float force = 0.0f;
-		//	AddBody(a,50)->Push(-(App->camera->Z.x * force), -(App->camera->Z.y * force), -(App->camera->Z.z * force));
-
-		//}
 	}
 
 	return UPDATE_CONTINUE;

@@ -334,6 +334,10 @@ update_status ModuleSceneIntro::Update(float dt)
 	{
 		reStart();
 	}
+	if (App->input->GetKey(SDL_SCANCODE_F2) == KEY_DOWN)
+	{
+		App->player->debug_fly_around = !App->player->debug_fly_around;
+	}
 
 	
 
