@@ -31,9 +31,10 @@ public:
 
 public:
 
-
+	float ScaleTime;
 	PhysVehicle3D* vehicle;
 
+	float* ActualColorGreen = nullptr;
 	float turn;
 	float acceleration;
 	float brake;

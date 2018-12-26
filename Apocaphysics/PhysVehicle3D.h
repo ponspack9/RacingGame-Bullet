@@ -2,11 +2,12 @@
 
 #include "PhysBody3D.h"
 #include "glmath.h"
+#include "Primitive.h"
+#include "Bullet/include/btBulletDynamicsCommon.h"
 
 class btRaycastVehicle;
 struct PhysBody3D;
-class Cylinder;
-class Cube;
+
  
 struct Wheel
 {
@@ -35,6 +36,10 @@ struct VehicleInfo
 	vec3 Misiles_Right;
 	vec3 Misiles_Right_Offset;
 
+	Cube cubeCounter=Cube(1,1,1);
+
+	vec3 OfsetCounter;
+
 
 
 	float mass;
@@ -49,6 +54,7 @@ struct VehicleInfo
 	int num_wheels;
 
 	Cube* Missiles_Left_Point;
+	
 };
 
 
@@ -58,6 +64,8 @@ public:
 	PhysVehicle3D(btRigidBody* body, btRaycastVehicle* vehicle, const VehicleInfo& info);
 	~PhysVehicle3D();
 
+
+	btVector3 IntitialRot;
 	void Render();
 	vec3 Position();
 	vec3 Misiles_leftPos();
@@ -68,8 +76,13 @@ public:
 	void Turn(float degrees);
 	float GetKmh() const;
 
+	float TimerG;
+	float TimerB;
+
 public:
+
 
 	VehicleInfo info;
 	btRaycastVehicle* vehicle;
+
 };

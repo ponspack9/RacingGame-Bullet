@@ -1,5 +1,4 @@
 #include "PhysBody3D.h"
-#include "glmath.h"
 #include "Bullet/include/btBulletDynamicsCommon.h"
 
 // =================================================
@@ -18,8 +17,7 @@ vec3 PhysBody3D::GetPosition() {
 
 	btVector3 ret;
 	ret = body->getWorldTransform().getOrigin();
-	/*ret.y = body->getWorldTransform().getOrigin().y;
-	ret.z = body->getWorldTransform().getOrigin().z;*/
+
 	return vec3(ret.getX(),ret.getY(),ret.getZ());
 }
 // ---------------------------------------------------------
@@ -37,9 +35,10 @@ void PhysBody3D::GetTransform(float* matrix) const
 	}
 }
 
-void PhysBody3D::Rotate(vec3 axis, float angle) {
+void PhysBody3D::Rotate(vec3 axis, float angle,bool conversion) {
 
-	angle = angle * (M_PI / 180);
+	if(conversion)
+		angle = angle * (M_PI / 180);
 
 	btVector3 ax = btVector3(axis.x, axis.y, axis.z);
 

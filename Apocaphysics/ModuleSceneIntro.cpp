@@ -3,11 +3,14 @@
 #include "ModuleSceneIntro.h"
 #include "Primitive.h"
 #include "PhysBody3D.h"
+#include "ModulePlayer.h"
 #include "ModulePhysics3D.h"
+#include "PhysVehicle3D.h"
 
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	total_city_cubes = 0;
+	cubes_destroyed = 0;
 	game_started = false;
 }
 
@@ -17,9 +20,11 @@ ModuleSceneIntro::~ModuleSceneIntro()
 // Load assets
 bool ModuleSceneIntro::Start()
 {
+	AbletoCameraShake = true;
+
 	LOG("Loading Intro assets");
 	bool ret = true;
-	
+	cubes_destroyed = 0;
 	App->camera->Move(vec3(40.0f, 200.0f, 40.0f));
 	App->camera->LookAt(vec3(40.0f, 0.0f, 40.0f));
   
@@ -31,8 +36,10 @@ bool ModuleSceneIntro::Start()
 	Ground=App->physics->AddBody(plane_Ground,10000);
 	Ground->type = GROUND;
   
-	CreateCity(200, { -100,0,-50 });
- 
+	CreateCity(20, { -100,0,-50 });
+
+	CreateStreetLight(vec3(10,0,10), 0.3, 7, 2,1.5, 1.5);
+
 	return ret;
 }
 
@@ -139,6 +146,30 @@ void ModuleSceneIntro::CreateBlock3x3(const vec3 &pos, int num_buildings, const 
 
 }
 
+void ModuleSceneIntro::CreateStreetLight(const vec3& Position, const float&light_w, const float&light_h, const float &cube_w, const float &cube_h, const float &cube_d) {
+
+	float x = light_w / 2;
+	float y = light_h / 2;
+	float z = light_w / 2;
+	
+	Cube* streetLight= new Cube(light_w,light_h,light_w);
+	Cube* Toplight = new Cube(cube_w, cube_h, cube_d);
+
+	streetLight->SetPos(x + Position.x, y + Position.y, z + Position.z);
+	streetLight->wire = false;
+	streetLight->color = White;
+	Toplight->SetPos(x + Position.x, light_h,z+Position.z);
+	Toplight->wire = false;
+	Toplight->color = Yellow;
+	BuildingPhys_List.add(App->physics->AddBody(*streetLight, 5000));
+	BuildingPhys_List.add(App->physics->AddBody(*Toplight, 5000));
+	BuildingPhys_List.getLast()->data->type = STREET_LIGHT;
+	BuildingPhys_List.getLast()->data->collision_listeners.add(App->scene_intro);
+
+	Building_List.add(streetLight);
+	Building_List.add(Toplight);
+
+}
 
 void ModuleSceneIntro::CreateBuilding(const vec3 &Position, const float &w, const float &h, const float &d)
 {
@@ -148,18 +179,36 @@ void ModuleSceneIntro::CreateBuilding(const vec3 &Position, const float &w, cons
 	float z = d / 2;
 	int HeightBuilding = rand() % 4 + 2;
 
-	Cube *a = new Cube();
-	a->size = vec3(w, h, d);
+	int colRand = rand() % 4;
+	Color colorBuild;
+	switch (colRand) {
+	case 0:
+		colorBuild = Grey;
+		break;
+	case 1:
+		colorBuild = Grey2;
+		break;
+	case 2:
+		colorBuild = Grey3;
+		break;
+	case 3:
+		colorBuild = Grey4;
+		break;
+	}
+
+	/*Cube *a = new Cube();
+	a->size = vec3(w, h, d);*/
 
 	for (z; z <= d * 2; z = z + d) {
 		for (x; x <= w * 2; x = x + w) {
 			for (y; y <= h * HeightBuilding; y = y + h) {
-        
+				Cube *a = new Cube();
+				a->size = vec3(w, h, d);
 				a->SetPos(x + Position.x, y + Position.y, z + Position.z);
 				a->wire = false;
-				a->color = Red;
+				a->color =colorBuild;
 				BuildingPhys_List.add(App->physics->AddBody(*a, 50));
-        BuildingPhys_List.getLast()->data->type = BUILDING;
+				BuildingPhys_List.getLast()->data->type = BUILDING;
 				BuildingPhys_List.getLast()->data->collision_listeners.add(App->scene_intro);
 				Building_List.add(a);
 				total_city_cubes++;
@@ -173,6 +222,8 @@ void ModuleSceneIntro::CreateBuilding(const vec3 &Position, const float &w, cons
 // Load assets
 bool ModuleSceneIntro::CleanUp()
 {
+	Building_List.clear();
+	BuildingPhys_List.clear();
 	LOG("Unloading Intro scene");
 
 	return true;
@@ -182,14 +233,11 @@ bool ModuleSceneIntro::CleanUp()
 update_status ModuleSceneIntro::Update(float dt)
 {
 
+	//Counter
 
+	//Time.SetPos(App->player->vehicle->GetPosition().x, App->player->vehicle->GetPosition().y, App->player->vehicle->GetPosition().z);
 
-	//p.wire = false;
-	//p.color = Grey;
-	//p.Scale(200, 0, 200);
-	////p.axis = true;
-	//p.Render();
-
+	//Time.Render();
 	plane_Ground.Render();
 
 
@@ -203,6 +251,7 @@ update_status ModuleSceneIntro::Update(float dt)
 			if (BuildingsPhys->data->count >= 70) {
 				BuildingsPhys->data->SetPos(5000, -200, 0);
 				BuildingsPhys->data->toDelete = false;
+			
 			}
 		}
 		BuildingsPhys->data->GetTransform(&Buildings->data->transform);
@@ -219,35 +268,111 @@ update_status ModuleSceneIntro::Update(float dt)
 
 		}
 	}
+	if (App->input->GetKey(SDL_SCANCODE_T) == KEY_DOWN)
+	{
+		reStart();
+	}
 
 	
 
 	return UPDATE_CONTINUE;
 }
+bool ModuleSceneIntro::reStart() {
+
+	App->physics->CleanUp();
+	App->physics->Start();
+	App->player->Start();
+	App->player->CleanUp();
+	App->scene_intro->CleanUp();
+	App->scene_intro->Start();
+
+
+	return true;
+}
 
 void ModuleSceneIntro::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
-{
-	if (body1->type == GROUND&&body2->type == BUILDING || body2->type == GROUND&&body1->type == BUILDING) {
-		if (body1->type == BUILDING) {
+{ 
+
+	if (LastCollided == body1 || LastCollided == body2) {
+		return;
+	}
+	if (body1->type == STREET_LIGHT&&body2->type!=NONE) {
+		p2List_item<PhysBody3D*>*BuildingsPhys = BuildingPhys_List.getFirst();
+		p2List_item<Cube*>*Buildings = Building_List.getFirst();
+		for (; BuildingsPhys != nullptr; BuildingsPhys = BuildingsPhys->next) {
+			if (BuildingsPhys->data == body1) {
+				Buildings->data->color = Black;
+				break;
+			}
+			Buildings = Buildings->next;
+		}
+	}
+	else if (body2->type == STREET_LIGHT&&body1->type!=NONE) {
+		p2List_item<PhysBody3D*>*BuildingsPhys = BuildingPhys_List.getFirst();
+		p2List_item<Cube*>*Buildings = Building_List.getFirst();
+		for (; BuildingsPhys != nullptr; BuildingsPhys = BuildingsPhys->next) {
+			if (BuildingsPhys->data == body2) {
+				Buildings->data->color = Black;
+				break;
+			}
+			Buildings = Buildings->next;
+		}
+	}
+	if ((body1->type== MISSILE || body1->type == GROUND)&&body2->type == BUILDING|| (body2->type==MISSILE || body2->type == GROUND)&&body1->type == BUILDING) {
+		
+		if (body1->type == BUILDING&&body2->type!=BUILDING&&body2->type!=NONE) {
+			LastCollided = body1;
 			p2List_item<PhysBody3D*>*BuildingsPhys = BuildingPhys_List.getFirst();
 			p2List_item<Cube*>*Buildings = Building_List.getFirst();
 
 			for (; BuildingsPhys != nullptr; BuildingsPhys = BuildingsPhys->next) {
-				if (BuildingsPhys->data == body1) {
+				if (BuildingsPhys->data == body1&&body1->toDelete == false) {
 					BuildingsPhys->data->toDelete = true;
+					Buildings->data->color = Red;
+					App->player->ScaleTime = 0;
+					App->player->vehicle->TimerB = 1.0f;
+					App->player->vehicle->TimerG = 1.0f;
+					cubes_destroyed++;
+					if (body2->type == MISSILE&&App->camera->DoCameraShake == false && AbletoCameraShake) {
+						float distance;
+						distance = sqrt(pow((body2->GetPosition().x - App->player->vehicle->Position().x), 2) + pow(body2->GetPosition().z - App->player->vehicle->Position().z, 2));
+						distance /= 13;
+						App->camera->CameraShake_Time.Start();
+						App->camera->power = 1.0f/distance; //this makes the camera shake more Drastic if wee are near to the building
+						App->camera->Time_Doing_Shake = 0.2f;
+						App->camera->DoCameraShake = true;
+						AbletoCameraShake = false;
+					}
 					//delete BuildingsPhys->data;
 					break;
 				}
 				Buildings = Buildings->next;
 			}
 		}
-		else if (body2->type == BUILDING) {
+		else if (body2->type == BUILDING&&body1->type != BUILDING&&body1->type != NONE) {
+			LastCollided = body2;
 			p2List_item<PhysBody3D*>*BuildingsPhys = BuildingPhys_List.getFirst();
 			p2List_item<Cube*>*Buildings = Building_List.getFirst();
 
 			for (; BuildingsPhys != nullptr; BuildingsPhys = BuildingsPhys->next) {
-				if (BuildingsPhys->data == body2) {
+				if (BuildingsPhys->data == body2&&body2->toDelete == false) {
 					BuildingsPhys->data->toDelete = true;
+					Buildings->data->color = Red;
+					App->player->ScaleTime = 0;
+					App->player->vehicle->TimerB = 1.0f;
+					App->player->vehicle->TimerG = 1.0f;
+					cubes_destroyed++;
+
+					if (body1->type==MISSILE&&App->camera->DoCameraShake == false&&AbletoCameraShake) {
+						float distance;
+						distance = sqrt(pow((body2->GetPosition().x - App->player->vehicle->Position().x), 2) + pow(body2->GetPosition().z - App->player->vehicle->Position().z, 2));
+						distance /= 13;
+						App->camera->CameraShake_Time.Start();
+						App->camera->power = 1.0f/distance;
+						App->camera->Time_Doing_Shake = 0.2f;
+						App->camera->DoCameraShake = true;
+						AbletoCameraShake = false;
+					}
 					break;
 				}
 				Buildings = Buildings->next;
