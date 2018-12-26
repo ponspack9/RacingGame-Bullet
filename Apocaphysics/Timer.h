@@ -21,6 +21,8 @@ public:
 
 	bool IsRunning();
 
+
+
 private:
 
 	bool	running;

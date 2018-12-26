@@ -4,6 +4,7 @@
 #include "Primitive.h"
 #include "PhysVehicle3D.h"
 #include "PhysBody3D.h"
+#include "Timer.h"
 
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled) : Module(app, start_enabled), vehicle(NULL)
 {
@@ -17,8 +18,11 @@ ModulePlayer::~ModulePlayer()
 bool ModulePlayer::Start()
 {
 
+	ScaleTime = 0;
 	LOG("Loading player");
-	VehicleInfo car;
+	VehicleInfo car;	
+	
+
 
 	// Car properties ----------------------------------------
 	car.chassis_size.Set(2, 1.5f, 4);
@@ -31,7 +35,6 @@ bool ModulePlayer::Start()
 	car.frictionSlip = 50.5;
 	car.maxSuspensionForce = 6000.0f;
 	//Decoration
-
 	car.Additional_Piece1.Set(2, 1.0f, 1);
 	car.Additional_Piece1_offset.Set(0, 0, -2);
 
@@ -39,6 +42,11 @@ bool ModulePlayer::Start()
 
 	car.Misiles_Left.Set(0.7,0.7,3);
 	car.Misiles_Left_Offset.Set(1.35, 1.4, -0.9);
+
+	car.cubeCounter = Cube(1.5,7,1.5);
+	car.cubeCounter.SetRotation(40, vec3(1, 0, 0));
+	car.OfsetCounter.Set(-5,0,0);
+	car.cubeCounter.size.Set(0.7, ScaleTime, 0.7);
 
 	car.Misiles_Right.Set(0.7, 0.7, 3);
 	car.Misiles_Right_Offset.Set(-1.35, 1.4, -0.9);
@@ -110,13 +118,19 @@ bool ModulePlayer::Start()
 	
 	vehicle = App->physics->AddVehicle(car);
 	vehicle->SetPos(40, 1, 10);
-
+	
+	vehicle->IntitialRot = vehicle->vehicle->getForwardVector();
+	vehicle->TimerG = 1.0f;
+	vehicle->TimerB = 1.0f;
 	return true;
 }
 
 // Unload assets
 bool ModulePlayer::CleanUp()
 {
+
+	Shooot_List.clear();
+	ShootPhys_List.clear();
 	LOG("Unloading player");
 
 	return true;
@@ -129,7 +143,7 @@ void ModulePlayer::Shoot() {
 	float force = 8000.0f;
 
 	if (shootLeft) {
-		Sphere* Left = new Sphere(0.4);
+		Sphere* Left = new Sphere(0.8f);
 		Left->wire = false;
 		Left->color = Blue;
 		
@@ -143,7 +157,7 @@ void ModulePlayer::Shoot() {
 		ShootRight = true;
 	}
 	else if (ShootRight) {
-		Sphere* Right = new Sphere(0.4);
+		Sphere* Right = new Sphere(0.8f);
 		Right->wire = false;
 		Right->color = Blue;
 
@@ -166,9 +180,10 @@ update_status ModulePlayer::Update(float dt)
 
 	char *c = "PRESS ENTER TO PLAY";
 
-	App->camera->Position=vehicle->Position() - vehicle->GoingForward()*10 + vec3(0,5,0);
+	if (App->camera->DoCameraShake == false) {
+		App->camera->Position = vehicle->Position() - vehicle->GoingForward() * 10 + vec3(0, 5, 0);
+	}
 	App->camera->LookAt(vehicle->Position());
-
 	if (App->scene_intro->game_started) {
 
 		c = "";
@@ -180,6 +195,10 @@ update_status ModulePlayer::Update(float dt)
 			else
 				acceleration = MAX_ACCELERATION;
 
+		}if (App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
+		{
+			acceleration = 8000.0f;
+
 		}
 
 		if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
@@ -187,10 +206,13 @@ update_status ModulePlayer::Update(float dt)
 			if (turn < TURN_DEGREES)
 				turn += TURN_DEGREES;
 		}
-	  if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN) {
-		Shoot();
-	  }
-
+		if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN) {
+			Shoot();
+		}
+		if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN) {
+			float angle = vehicle->IntitialRot.angle(vehicle->vehicle->getForwardVector());
+			vehicle->Rotate(vec3(0, 1, 0), -angle, false);
+		}
 		if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 		{
 			if (turn > -TURN_DEGREES)
@@ -223,52 +245,59 @@ update_status ModulePlayer::Update(float dt)
 		}
 
 		// END PLAYING CONDITION
-	}
 
 
-	p2List_item<PhysBody3D*>*Missiles_Phys = ShootPhys_List.getFirst();
-	p2List_item<Sphere*>*Missiles = Shooot_List.getFirst();
 
-	for (; Missiles != nullptr; Missiles = Missiles->next) {
-		if (Missiles->data != nullptr) {
-			Cube* Gas = new Cube(0.9f,0.9f,0.9f);
-			int a = (rand() % 3)-1;
-			Gas->SetPos(Missiles_Phys->data->GetPosition().x+a, Missiles_Phys->data->GetPosition().y+a, Missiles_Phys->data->GetPosition().z+a);
-			Missiles->data->Gas.add(Gas);
-			p2List_item<Cube*>*Gas_Particle = Missiles->data->Gas.getFirst();
-			for (; Gas_Particle != nullptr; Gas_Particle = Gas_Particle->next) {
-				Gas_Particle->data->Scale(Gas_Particle->data->size.x, Gas_Particle->data->size.y, Gas_Particle->data->size.z);
-				Gas_Particle->data->size.x += 0.08;
-				Gas_Particle->data->size.y += 0.08;
-				Gas_Particle->data->size.z += 0.08;
-				Gas_Particle->data->Render();
+		p2List_item<PhysBody3D*>*Missiles_Phys = ShootPhys_List.getFirst();
+		p2List_item<Sphere*>*Missiles = Shooot_List.getFirst();
+
+		for (; Missiles != nullptr; Missiles = Missiles->next) {
+			if (Missiles->data != nullptr) {
+				Cube* Gas = new Cube(0.9f, 0.9f, 0.9f);
+				int a = (rand() % 3) - 1;
+				Gas->SetPos(Missiles_Phys->data->GetPosition().x + a, Missiles_Phys->data->GetPosition().y + a, Missiles_Phys->data->GetPosition().z + a);
+				Missiles->data->Gas.add(Gas);
+				p2List_item<Cube*>*Gas_Particle = Missiles->data->Gas.getFirst();
+				for (; Gas_Particle != nullptr; Gas_Particle = Gas_Particle->next) {
+					Gas_Particle->data->Scale(Gas_Particle->data->size.x, Gas_Particle->data->size.y, Gas_Particle->data->size.z);
+					Gas_Particle->data->size.x += 0.08;
+					Gas_Particle->data->size.y += 0.08;
+					Gas_Particle->data->size.z += 0.08;
+					Gas_Particle->data->Render();
+				}
+				if (Missiles->data->Gas.count() >= 10) {
+					Gas_Particle = Missiles->data->Gas.getFirst();
+					Missiles->data->Gas.del(Missiles->data->Gas.getFirst());
+				}
+				Missiles_Phys->data->GetTransform(&Missiles->data->transform);
+				Missiles->data->Render();
+				Missiles->data->time++;
 			}
-			if (Missiles->data->Gas.count() >= 10) {
-				Gas_Particle = Missiles->data->Gas.getFirst();
-				Missiles->data->Gas.del(Missiles->data->Gas.getFirst());
+			if (Missiles->data->time >= 100) {
+				Missiles->data->Gas.clear();
+				ShootPhys_List.del(Missiles_Phys);
+				Shooot_List.del(Missiles);
+				App->scene_intro->AbletoCameraShake = true;
+				break;
 			}
-			Missiles_Phys->data->GetTransform(&Missiles->data->transform);
-			Missiles->data->Render();
-			Missiles->data->time++;
-		}
-		if (Missiles->data->time >= 50) {
-			Missiles->data->Gas.clear();
-			ShootPhys_List.del(Missiles_Phys);
-			Shooot_List.del(Missiles);
-			break;
+
+			Missiles_Phys = Missiles_Phys->next;
 		}
 
-		Missiles_Phys = Missiles_Phys->next;
+		vehicle->info.cubeCounter.size.Set(0.7, ScaleTime, 0.7);
+		vehicle->TimerG -= 0.002;
+		vehicle->TimerB -= 0.002;
+
+
+		ScaleTime += 0.01;
+		vehicle->ApplyEngineForce(acceleration);
+		vehicle->Turn(turn);
+		vehicle->Brake(brake);
 	}
-
-	vehicle->ApplyEngineForce(acceleration);
-	vehicle->Turn(turn);
-	vehicle->Brake(brake);
-
 	vehicle->Render();
 
-	char title[80];
-	sprintf_s(title, "%.1f Km/h  Total cubes: %d Time left: %f %s", vehicle->GetKmh(),App->scene_intro->total_city_cubes, 60.0f - App->scene_intro->main_timer.ReadSeconds(),c);
+	char title[100];
+	sprintf_s(title, "%.1f Km/h  Total cubes: %d Total cubes killed: %d Time left: %f %s", vehicle->GetKmh(),App->scene_intro->total_city_cubes,App->scene_intro->cubes_destroyed, 60.0f - App->scene_intro->main_timer.ReadSeconds(),c);
 	App->window->SetTitle(title);
 
 	

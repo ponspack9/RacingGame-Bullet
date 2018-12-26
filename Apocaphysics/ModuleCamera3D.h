@@ -18,6 +18,13 @@ public:
 	void Move(const vec3 &Movement);
 	float* GetViewMatrix();
 
+
+	void CameraShake(float power);
+	float power;
+	bool DoCameraShake = false;
+	Timer CameraShake_Time;
+	float Time_Doing_Shake;
+
 private:
 
 	void CalculateViewMatrix();

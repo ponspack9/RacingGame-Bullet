@@ -19,7 +19,7 @@ public:
 	bool Start();
 	update_status Update(float dt);
 	bool CleanUp();
-
+	bool reStart();
 	void OnCollision(PhysBody3D* body1, PhysBody3D* body2);
 
 public:
@@ -39,9 +39,9 @@ public:
 
 	// Creates a plane building, without sidewalk
 	void CreateBuilding(const vec3 &Position, const float &w, const float &h, const float &d);
-
+	void CreateStreetLight(const vec3& Position, const float&light_w,const float&light_h,const float &cube_w,const float &cube_h,const float &cube_d);
 	int total_city_cubes;
-
+	int cubes_destroyed;
 	p2List<Cube*> Building_List;
 	p2List<PhysBody3D*>BuildingPhys_List;
 
@@ -54,6 +54,7 @@ public:
 	PhysBody3D* pb_wheel2;
 	Cylinder p_wheel2;
 
+	Cube Time;
 
 	Cube plane_Ground;
 
@@ -62,7 +63,10 @@ public:
 	PhysMotor3D* left_wheel;
 	PhysMotor3D* right_wheel;
 
+	PhysBody3D* LastCollided;
+
 	bool game_started;
+	bool AbletoCameraShake;
 
 	Timer main_timer;
 };
