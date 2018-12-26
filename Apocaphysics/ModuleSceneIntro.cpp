@@ -37,10 +37,7 @@ bool ModuleSceneIntro::Start()
 }
 
 /*
-	Crear surrounding de la ciutat
 	fer que seliminin els blocs_top al tocar lacera
-	Fer el timer visual
-	reset del cotxe
 	Percentatge 
 */
 
@@ -52,19 +49,7 @@ bool ModuleSceneIntro::Start()
 */
 void ModuleSceneIntro::CreateCity(float max_width, vec3 pos, float buildings_offset) {
 
-	// Create surrounding wall
-
-	//Cube* wall1 = new Cube(2*max_width, 10, 10); wall1->SetPos(pos.x + max_width, 5, pos.z);
-	//Cube* wall2 = new Cube(10, 10, 2*max_width); wall2->SetPos(pos.x, 5, pos.z + max_width);
-	///*Cube* wall3 = new Cube(max_width, 10, 10);
-	//Cube* wall4 = new Cube(max_width, 10, 10);*/
-
-	//BuildingPhys_List.add(App->physics->AddBody(*wall1, 9999));
-	//Building_List.add(wall1);
-	//BuildingPhys_List.add(App->physics->AddBody(*wall2, 9999));
-	//Building_List.add(wall2);
-
-
+	
 	int n_buildings = 0;
 	int placed = 0;
 
@@ -73,11 +58,12 @@ void ModuleSceneIntro::CreateCity(float max_width, vec3 pos, float buildings_off
 	float block_depth  = 10;
 
 	float road_offset = 10.0f;
+	float z = 0;
 
 	vec3 aux_pos = pos;
 
 	// First bucle stands for x axis block creation
-	while (pos.x <= (max_width + aux_pos.x))
+	while (pos.x < (max_width + aux_pos.x))
 	{
 		//Defining next block
 		n_buildings = (rand() + SDL_GetTicks()) % 8 + 2;
@@ -85,40 +71,54 @@ void ModuleSceneIntro::CreateCity(float max_width, vec3 pos, float buildings_off
 		block_depth = ((rand() + SDL_GetTicks()) % 20) + 5.0f;
 
 		//Create last block
-		if (pos.x + block_width * 2 + buildings_offset * 4 > (max_width + aux_pos.x)) {
+		if (pos.x + block_width * 2 + buildings_offset * 4 >= (max_width + aux_pos.x)) 
+		{
 			block_width = ((aux_pos.x + max_width) - pos.x) / 2;
-			//if (block_width < 5) n_buildings = 0;
+			CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
+
+			if (block_width < 5) n_buildings = 0;
 		}
-		CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
+		else CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
+
 		placed++;
 
 		// For each block created on x axis, the following blocks in z axis must respect its width
-		while (pos.z <= (max_width + aux_pos.z)) {
-
+		while (pos.z < (max_width + aux_pos.z)) 
+		{
+			n_buildings = (rand() + SDL_GetTicks()) % 8 + 2;
 			pos.z += block_depth * 2 + buildings_offset * 4 + road_offset;
 			block_depth = ((rand() + SDL_GetTicks()) % 20) + 5.0f;
 
-			if (pos.z + block_depth * 2 + buildings_offset * 4 > (max_width + aux_pos.z)) {
+			//Create last block
+			if (pos.z + block_depth * 2 + buildings_offset * 4 >= (max_width + aux_pos.z)) {
 				block_depth = ((aux_pos.z + max_width) - pos.z)/2;
-				//if (block_depth < 5) n_buildings = 0;
+				CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
+				if (block_width < 5) n_buildings = 0;
+
 			}
-			CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
-
-			////Create last block
-			//if (pos.z >= (max_width + aux_pos.z)) {
-			//	pos.z += block_depth * 2 + buildings_offset * 4 + road_offset;
-			//	block_depth = (aux_pos.z + max_width) - pos.z;
-			//	CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
-			//}
-
+			else CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
 		}
 
+		z = pos.z;
 		pos.z = aux_pos.z;
 		pos.x += block_width * 2 + buildings_offset * 4 + road_offset;
-
-		
 	}
 
+	// Create surrounding wall
+	
+	Cube* wall1 = new Cube(pos.x-aux_pos.x + 10, 10, 10);   wall1->SetPos(aux_pos.x + (pos.x - aux_pos.x) / 2 - 5, 5, aux_pos.z - 15);
+	Cube* wall2 = new Cube(10, 10, z - aux_pos.z +10); wall2->SetPos(aux_pos.x - 15, 5, aux_pos.z + (z - aux_pos.z) / 2 - 5);
+	Cube* wall3 = new Cube(*wall1); wall3->SetPos(aux_pos.x + (pos.x - aux_pos.x) / 2 - 5, 5, z+5);
+	Cube* wall4 = new Cube(*wall2); wall4->SetPos(pos.x + 5, 5, aux_pos.z + (z - aux_pos.z) / 2 -5);
+
+	BuildingPhys_List.add(App->physics->AddBody(*wall1, 9999));
+	Building_List.add(wall1);
+	BuildingPhys_List.add(App->physics->AddBody(*wall2, 9999));
+	Building_List.add(wall2);
+	BuildingPhys_List.add(App->physics->AddBody(*wall3, 9999));
+	Building_List.add(wall3);
+	BuildingPhys_List.add(App->physics->AddBody(*wall4, 9999));
+	Building_List.add(wall4);
 
 }
 
