@@ -180,9 +180,11 @@ update_status ModulePlayer::Update(float dt)
 
 	char *c = "PRESS ENTER TO PLAY";
 
+
 	if (App->camera->DoCameraShake == false) {
 		App->camera->Position = vehicle->Position() - vehicle->GoingForward() * 10 + vec3(0, 5, 0);
 	}
+
 	App->camera->LookAt(vehicle->Position());
 	if (App->scene_intro->game_started) {
 
