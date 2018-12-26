@@ -10,7 +10,7 @@ This game was developed by students Roger Leon and Òscar Pons for Physics II su
 - LEFT  	-> turn left
 - RIGHT     -> turn right
 - SPACE     -> shoot missiles
-- CONTROL   -> car boost
+- LEFT CONTROL   -> car boost
 
 - RETURN -> start playing
 - R -> reset car rotation  
@@ -30,7 +30,13 @@ Accelerate as much as you can, remember to avoid hitting streetlights, they will
 
 ### Debug Keys
 
-- F2 -> freely move camera (ASWD + Right mouse button)
+
+- F2 -> freely move camera:
+  - A -> Move camera to the left
+  - D -> Move camera to the right
+  - W -> Move camera forwards
+  - S -> Move camera backwards
+  - RIGHT MOUSE BUTTON -> rotate camera
 - F3 -> restart game
 
 - ESC -> quit game
@@ -51,6 +57,7 @@ Accelerate as much as you can, remember to avoid hitting streetlights, they will
 Project Github: https://github.com/ponspack9/RacingGame-Bullet
 
 ## Credits
+
 Done with SDL, OpenGL, Bullet Library and Visual Studio. Game licensed under a MIT License (see full license at game folder or github repository).
 
 By Roger Leon and Òscar Pons
