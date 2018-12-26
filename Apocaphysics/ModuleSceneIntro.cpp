@@ -33,6 +33,9 @@ bool ModuleSceneIntro::Start()
 	App->camera->Move(vec3(40.0f, 200.0f, 40.0f));
 	App->camera->LookAt(vec3(40.0f, 0.0f, 40.0f));
   
+
+	App->player->acceleration = 0;
+	App->player->turn = 0;
 	CreateCity(100, { -50,0.2f,-50 });
 
 	return ret;
@@ -110,8 +113,8 @@ void ModuleSceneIntro::CreateCity(float max_width, vec3 pos, float buildings_off
 
 	// Create surrounding wall
 	
-	Cube* wall1 = new Cube(pos.x-aux_pos.x + 10, 10, 10);   wall1->SetPos(aux_pos.x + (pos.x - aux_pos.x) / 2 - 5, 5, aux_pos.z - 15);
-	Cube* wall2 = new Cube(10, 10, z - aux_pos.z +10); wall2->SetPos(aux_pos.x - 15, 5, aux_pos.z + (z - aux_pos.z) / 2 - 5);
+	Cube* wall1 = new Cube(pos.x-aux_pos.x + 10, 15, 10);   wall1->SetPos(aux_pos.x + (pos.x - aux_pos.x) / 2 - 5, 5, aux_pos.z - 15);
+	Cube* wall2 = new Cube(10, 15, z - aux_pos.z +10); wall2->SetPos(aux_pos.x - 15, 5, aux_pos.z + (z - aux_pos.z) / 2 - 5);
 	Cube* wall3 = new Cube(*wall1); wall3->SetPos(aux_pos.x + (pos.x - aux_pos.x) / 2 - 5, 5, z+5);
 	Cube* wall4 = new Cube(*wall2); wall4->SetPos(pos.x + 5, 5, aux_pos.z + (z - aux_pos.z) / 2 -5);
 

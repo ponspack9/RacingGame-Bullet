@@ -287,15 +287,15 @@ update_status ModulePlayer::Update(float dt)
 			Missiles_Phys = Missiles_Phys->next;
 		}
 
-		if (ScaleTime >= 6.2f) {
+		if (ScaleTime >= 8.0f) {
 			App->scene_intro->reStart();
 		}
 		vehicle->info.cubeCounter.size.Set(0.7, ScaleTime, 0.7);
-		vehicle->TimerG -= 0.002;
-		vehicle->TimerB -= 0.002;
+		vehicle->TimerG -= 0.003;
+		vehicle->TimerB -= 0.003;
 
 
-		ScaleTime += 0.01;
+		ScaleTime += 0.02;
 		vehicle->ApplyEngineForce(acceleration);
 		vehicle->Turn(turn);
 		vehicle->Brake(brake);
@@ -303,7 +303,7 @@ update_status ModulePlayer::Update(float dt)
 	vehicle->Render();
 
 	char title[256];
-	sprintf_s(title, "%.1f Km/h  Total cubes: %d Total cubes killed: %d Time left: %f %s COMPLETED: %d%c", vehicle->GetKmh(),App->scene_intro->total_city_cubes,App->scene_intro->cubes_destroyed, (App->scene_intro->main_timer.IsRunning())?60.0f - App->scene_intro->main_timer.ReadSeconds():0.0f,c, int(App->scene_intro->cubes_destroyed*100/App->scene_intro->total_city_cubes),'%');
+	sprintf_s(title, "%.1f Km/h  Total cubes: %d Total cubes killed: %d Time left: %0.2f %s COMPLETED: %d%c", vehicle->GetKmh(),App->scene_intro->total_city_cubes,App->scene_intro->cubes_destroyed, (App->scene_intro->main_timer.IsRunning())? 60.0f - App->scene_intro->main_timer.ReadSeconds():0.0f,c, int(App->scene_intro->cubes_destroyed*100/App->scene_intro->total_city_cubes),'%');
 	App->window->SetTitle(title);
 
 	
