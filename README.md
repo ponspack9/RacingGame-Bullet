@@ -38,7 +38,8 @@ Accelerate as much as you can, remember to avoid hitting streetlights, they will
   - S -> Move camera backwards
   - RIGHT MOUSE BUTTON -> rotate camera
 - F3 -> restart game
-
+- F5 -> Decrease volume
+- F6 -> Increase volume
 - ESC -> quit game
 
 ## Game Special Details
