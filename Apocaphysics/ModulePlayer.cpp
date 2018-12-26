@@ -233,7 +233,7 @@ update_status ModulePlayer::Update(float dt)
 
 		if (vehicle->GetKmh() <= 5.0f) {
 			if (!no_velocity_timer.IsRunning()) no_velocity_timer.Start();
-			c = "TIMER ON";
+			c = "TIMER ON, MOVE OR LOSE!";
 		}
 		else {
 			no_velocity_timer.Reset();
@@ -243,6 +243,7 @@ update_status ModulePlayer::Update(float dt)
 			App->scene_intro->game_started = false;
 			App->scene_intro->main_timer.Reset();
 			no_velocity_timer.Reset();
+			App->scene_intro->reStart();
 			c = "YOU LOSE";
 		}
 
@@ -298,8 +299,8 @@ update_status ModulePlayer::Update(float dt)
 	}
 	vehicle->Render();
 
-	char title[100];
-	sprintf_s(title, "%.1f Km/h  Total cubes: %d Total cubes killed: %d Time left: %f %s", vehicle->GetKmh(),App->scene_intro->total_city_cubes,App->scene_intro->cubes_destroyed, 60.0f - App->scene_intro->main_timer.ReadSeconds(),c);
+	char title[256];
+	sprintf_s(title, "%.1f Km/h  Total cubes: %d Total cubes killed: %d Time left: %f %s COMPLETED: %d%c", vehicle->GetKmh(),App->scene_intro->total_city_cubes,App->scene_intro->cubes_destroyed, (App->scene_intro->main_timer.IsRunning())?60.0f - App->scene_intro->main_timer.ReadSeconds():0.0f,c, int(App->scene_intro->cubes_destroyed*100/App->scene_intro->total_city_cubes),'%');
 	App->window->SetTitle(title);
 
 	

@@ -23,6 +23,11 @@ bool ModuleSceneIntro::Start()
 	AbletoCameraShake = true;
 
 	LOG("Loading Intro assets");
+
+	total_city_cubes = 0;
+	game_started = false;
+	main_timer.Reset();
+
 	bool ret = true;
 	cubes_destroyed = 0;
 	App->camera->Move(vec3(40.0f, 200.0f, 40.0f));
@@ -35,10 +40,8 @@ bool ModuleSceneIntro::Start()
 	plane_Ground.SetPos(0, -2, 0);
 	Ground=App->physics->AddBody(plane_Ground,10000);
 	Ground->type = GROUND;
-  
-	CreateCity(20, { -100,0,-50 });
-
-	CreateStreetLight(vec3(10,0,10), 0.3, 7, 2,1.5, 1.5);
+	
+	CreateCity(100, { -50,0,-50 });
 
 	return ret;
 }
@@ -81,9 +84,11 @@ void ModuleSceneIntro::CreateCity(float max_width, vec3 pos, float buildings_off
 		if (pos.x + block_width * 2 + buildings_offset * 4 > (max_width + aux_pos.x)) 
 		{
 			block_width = ((aux_pos.x + max_width) - pos.x) / 2;
-			CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
+			if (block_width < 10) n_buildings = 0;
 
-			if (block_width < 5) n_buildings = 0;
+			if (block_width > 0)
+				CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
+
 		}
 		else CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
 
@@ -99,8 +104,11 @@ void ModuleSceneIntro::CreateCity(float max_width, vec3 pos, float buildings_off
 			//Create last block
 			if (pos.z + block_depth * 2 + buildings_offset * 4 > (max_width + aux_pos.z)) {
 				block_depth = ((aux_pos.z + max_width) - pos.z)/2;
-				CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
-				if (block_width < 5) n_buildings = 0;
+				if (block_depth < 10) n_buildings = 0;
+
+				if (block_depth > 0)
+					CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
+
 				pos.z += block_depth * 2 + buildings_offset * 4 + road_offset;
 
 
@@ -158,6 +166,12 @@ void ModuleSceneIntro::CreateBlock3x3(const vec3 &pos, int num_buildings, const 
 	
 	BuildingPhys_List.add(App->physics->AddBody(*sidewalk, 9999));
 	Building_List.add(sidewalk);
+
+	//Creating streetlights
+	CreateStreetLight(vec3(position.x - 2.5, 0, position.z - 2.5), 0.3, 7, 2, 1.5, 1.5);
+	CreateStreetLight(vec3(position.x + 2*block_width + offset*3 -2.5, 0, position.z-2.5), 0.3, 7, 2, 1.5, 1.5);
+	CreateStreetLight(vec3(position.x - 2.5, 0, 2 * block_depth + 3 * offset + position.z - 2.5), 0.3, 7, 2, 1.5, 1.5);
+	CreateStreetLight(vec3(position.x + 2 * block_width + offset * 3 - 2.5, 0, 2*block_depth + 3*offset + position.z - 2.5), 0.3, 7, 2, 1.5, 1.5);
 
 
 	// Randomly fills a imaginary 3x3 boolean matrix to place the buildings
@@ -222,6 +236,10 @@ void ModuleSceneIntro::CreateBuilding(const vec3 &Position, const float &w, cons
 	float z = d / 2;
 	int HeightBuilding = rand() % 4 + 2;
 
+	/*if (x < 1 || y < 1 || z < 1) {
+		int a = 1;
+	}*/
+
 	int colRand = rand() % 4;
 	Color colorBuild;
 	switch (colRand) {
@@ -242,16 +260,18 @@ void ModuleSceneIntro::CreateBuilding(const vec3 &Position, const float &w, cons
 	for (z; z <= d * 2; z = z + d) {
 		for (x; x <= w * 2; x = x + w) {
 			for (y; y <= h * HeightBuilding; y = y + h) {
-				Cube *a = new Cube();
-				a->size = vec3(w, h, d);
-				a->SetPos(x + Position.x, y + Position.y, z + Position.z);
-				a->wire = false;
-				a->color =colorBuild;
-				BuildingPhys_List.add(App->physics->AddBody(*a, 50));
-				BuildingPhys_List.getLast()->data->type = BUILDING;
-				BuildingPhys_List.getLast()->data->collision_listeners.add(App->scene_intro);
-				Building_List.add(a);
-				total_city_cubes++;
+				if (x != 0 && y != 0 && z != 0) {
+					Cube *a = new Cube();
+					a->size = vec3(w, h, d);
+					a->SetPos(x + Position.x, y + Position.y, z + Position.z);
+					a->wire = false;
+					a->color = colorBuild;
+					BuildingPhys_List.add(App->physics->AddBody(*a, 50));
+					BuildingPhys_List.getLast()->data->type = BUILDING;
+					BuildingPhys_List.getLast()->data->collision_listeners.add(App->scene_intro);
+					Building_List.add(a);
+					total_city_cubes++;
+				}
 			}
 			y = h / 2;
 		}
@@ -300,12 +320,21 @@ update_status ModuleSceneIntro::Update(float dt)
 		BuildingsPhys = BuildingsPhys->next;
 	}
 
+	if (cubes_destroyed >= total_city_cubes) {
+		game_started = false;
+		reStart();
+	}
+
+	if (main_timer.ReadSeconds() > 60) {
+		game_started = false;
+		reStart();
+	}
+
 	if (App->input->GetKey(SDL_SCANCODE_RETURN) == KEY_REPEAT)
 	{
 		if (!game_started) {
 			game_started = true;
 			main_timer.Start();
-
 		}
 	}
 	if (App->input->GetKey(SDL_SCANCODE_T) == KEY_DOWN)
