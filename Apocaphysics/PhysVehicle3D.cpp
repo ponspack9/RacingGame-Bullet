@@ -1,6 +1,5 @@
 #include "PhysVehicle3D.h"
 #include "Primitive.h"
-#include "Bullet/include/btBulletDynamicsCommon.h"
 
 // ----------------------------------------------------------------------------
 VehicleInfo::~VehicleInfo()
@@ -42,12 +41,23 @@ void PhysVehicle3D::Render()
 	Cube chassis(info.chassis_size.x, info.chassis_size.y, info.chassis_size.z);
 	vehicle->getChassisWorldTransform().getOpenGLMatrix(&chassis.transform);
 	btQuaternion q = vehicle->getChassisWorldTransform().getRotation();
+	
 	btVector3 offset(info.chassis_offset.x, info.chassis_offset.y, info.chassis_offset.z);
 	offset = offset.rotate(q.getAxis(), q.getAngle());
 
 	chassis.transform.M[12] += offset.getX();
 	chassis.transform.M[13] += offset.getY();
 	chassis.transform.M[14] += offset.getZ();
+
+	info.cubeCounter = Cube(info.cubeCounter.size.x, info.cubeCounter.size.y, info.cubeCounter.size.z);
+	info.cubeCounter.color.Set(1.0f,TimerG,TimerB );
+	vehicle->getChassisWorldTransform().getOpenGLMatrix(&info.cubeCounter.transform);
+	btVector3 offsettimer(info.OfsetCounter.x, info.OfsetCounter.y, info.OfsetCounter.z);
+	offsettimer = offsettimer.rotate(q.getAxis(), q.getAngle());
+
+	info.cubeCounter.transform.M[12] += offsettimer.getX();
+	info.cubeCounter.transform.M[13] += offsettimer.getY();
+	info.cubeCounter.transform.M[14] += offsettimer.getZ();
 
 	Cube Deco1(info.Additional_Piece1.x, info.Additional_Piece1.y, info.Additional_Piece1.z);
 	vehicle->getChassisWorldTransform().getOpenGLMatrix(&Deco1.transform);
@@ -62,7 +72,6 @@ void PhysVehicle3D::Render()
 	Cube Missiles_Left(info.Misiles_Left.x, info.Misiles_Left.y,info.Misiles_Left.z);
 	info.Missiles_Left_Point = &Missiles_Left;
 	vehicle->getChassisWorldTransform().getOpenGLMatrix(&Missiles_Left.transform);
-
 	btVector3 offset3(info.Misiles_Left_Offset.x, info.Misiles_Left_Offset.y, info.Misiles_Left_Offset.z);
 	offset3 = offset3.rotate(q.getAxis(), q.getAngle());
 
@@ -76,15 +85,13 @@ void PhysVehicle3D::Render()
 	vehicle->getChassisWorldTransform().getOpenGLMatrix(&Missiles_Right.transform);
 
 	btVector3 offset4(info.Misiles_Right_Offset.x, info.Misiles_Right_Offset.y, info.Misiles_Right_Offset.z);
-
 	offset4 = offset4.rotate(q.getAxis(), q.getAngle());
 
 	Missiles_Right.transform.M[12] += offset4.getX();
 	Missiles_Right.transform.M[13] += offset4.getY();
 	Missiles_Right.transform.M[14] += offset4.getZ();
 
-
-
+	info.cubeCounter.Render();
 	chassis.Render();
 	Deco1.Render();
 	Missiles_Right.Render();
@@ -176,7 +183,9 @@ void PhysVehicle3D::Turn(float degrees)
 }
 
 vec3 PhysVehicle3D::GoingForward() {
+
 	btVector3 ret = vehicle->getForwardVector();
+
 	return vec3(ret.getX(), ret.getY(), ret.getZ());
 }
 

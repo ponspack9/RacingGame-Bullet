@@ -2,6 +2,8 @@
 #include "Application.h"
 #include "PhysBody3D.h"
 #include "ModuleCamera3D.h"
+#include "ModulePlayer.h"
+#include "PhysVehicle3D.h"
 
 ModuleCamera3D::ModuleCamera3D(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
@@ -35,11 +37,46 @@ bool ModuleCamera3D::CleanUp()
 	return true;
 }
 
+void ModuleCamera3D::CameraShake(float power) {
+
+	int a = rand() % 6;
+	float strenght = 0;
+	switch (a) {
+	case 0:
+		
+		strenght= 0.3 * power;
+		break;
+	case 1:
+		strenght-= 0.3 * power;
+		break;
+	case 2:
+		strenght += 0.3 * power;
+		break;
+	case 3:
+		strenght -= 0.3 * power;
+	case 4:
+		strenght -= 0.3 * power;
+	case 5:
+		strenght -= 0.3 * power;
+	}
+	
+	Position = App->player->vehicle->Position() - App->player->vehicle->GoingForward() * 10 + vec3(0+strenght, 5+strenght, 0+strenght);
+	strenght = 0;
+	
+}
 // -----------------------------------------------------------------
 update_status ModuleCamera3D::Update(float dt)
 {
 	// Implement a debug camera with keys and mouse
 	// Now we can make this movememnt frame rate independant!
+
+	if (DoCameraShake) {
+		if (CameraShake_Time.ReadSeconds() < Time_Doing_Shake)
+			CameraShake(power);
+		else {
+			DoCameraShake = false;
+		}
+	}
 
 	vec3 newPos(0,0,0);
 	float speed = 3.0f * dt;

@@ -22,9 +22,10 @@ Application::Application()
 	AddModule(audio);
 	AddModule(physics);
 	
-	// Scenes
-	AddModule(scene_intro);
+	// Scenes	
 	AddModule(player);
+	AddModule(scene_intro);
+
 
 	// Renderer last!
 	AddModule(renderer3D);
