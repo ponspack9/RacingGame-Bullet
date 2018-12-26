@@ -28,15 +28,15 @@ bool ModuleSceneIntro::Start()
 	App->camera->Move(vec3(40.0f, 200.0f, 40.0f));
 	App->camera->LookAt(vec3(40.0f, 0.0f, 40.0f));
   
-	plane_Ground=Cube(600.0f, 0.2f,600.f);
-	plane_Ground.wire = false;
-	plane_Ground.color = Grey;
-	
-	plane_Ground.SetPos(0, -2, 0);
-	Ground=App->physics->AddBody(plane_Ground,10000);
-	Ground->type = GROUND;
+	//plane_Ground=Cube(600.0f, 0.2f,600.f);
+	//plane_Ground.wire = false;
+	//plane_Ground.color = Grey;
+	//
+	//plane_Ground.SetPos(0, 0, 0);
+	//Ground=App->physics->AddBody(plane_Ground,2);
+	//Ground->type = GROUND;
   
-	CreateCity(20, { -100,0,-50 });
+	CreateCity(100, { -50,0.2f,-50 });
 
 	CreateStreetLight(vec3(10,0,10), 0.3, 7, 2,1.5, 1.5);
 
@@ -121,6 +121,7 @@ void ModuleSceneIntro::CreateCity(float max_width, vec3 pos, float buildings_off
 	Cube* wall4 = new Cube(*wall2); wall4->SetPos(pos.x + 5, 5, aux_pos.z + (z - aux_pos.z) / 2 -5);
 
 	BuildingPhys_List.add(App->physics->AddBody(*wall1, 9999));
+	SpotPoint = (BuildingPhys_List.getLast()->data->GetPosition().x+5, BuildingPhys_List.getLast()->data->GetPosition().y, BuildingPhys_List.getLast()->data->GetPosition().z);
 	Building_List.add(wall1);
 	BuildingPhys_List.add(App->physics->AddBody(*wall2, 9999));
 	Building_List.add(wall2);
@@ -205,7 +206,7 @@ void ModuleSceneIntro::CreateStreetLight(const vec3& Position, const float&light
 	Toplight->wire = false;
 	Toplight->color = Yellow;
 	BuildingPhys_List.add(App->physics->AddBody(*streetLight, 5000));
-	BuildingPhys_List.add(App->physics->AddBody(*Toplight, 5000));
+	BuildingPhys_List.add(App->physics->AddBody(*Toplight, 100));
 	BuildingPhys_List.getLast()->data->type = STREET_LIGHT;
 	BuildingPhys_List.getLast()->data->collision_listeners.add(App->scene_intro);
 
@@ -238,24 +239,25 @@ void ModuleSceneIntro::CreateBuilding(const vec3 &Position, const float &w, cons
 		colorBuild = Grey4;
 		break;
 	}
-
-	for (z; z <= d * 2; z = z + d) {
-		for (x; x <= w * 2; x = x + w) {
-			for (y; y <= h * HeightBuilding; y = y + h) {
-				Cube *a = new Cube();
-				a->size = vec3(w, h, d);
-				a->SetPos(x + Position.x, y + Position.y, z + Position.z);
-				a->wire = false;
-				a->color =colorBuild;
-				BuildingPhys_List.add(App->physics->AddBody(*a, 50));
-				BuildingPhys_List.getLast()->data->type = BUILDING;
-				BuildingPhys_List.getLast()->data->collision_listeners.add(App->scene_intro);
-				Building_List.add(a);
-				total_city_cubes++;
+	if (x != 0 && y != 0 && z != 0) {
+		for (z; z <= d * 2; z = z + d) {
+			for (x; x <= w * 2; x = x + w) {
+				for (y; y <= h * HeightBuilding; y = y + h) {
+					Cube *a = new Cube();
+					a->size = vec3(w, h, d);
+					a->SetPos(x + Position.x, y + Position.y, z + Position.z);
+					a->wire = false;
+					a->color = colorBuild;
+					BuildingPhys_List.add(App->physics->AddBody(*a, 50));
+					BuildingPhys_List.getLast()->data->type = BUILDING;
+					BuildingPhys_List.getLast()->data->collision_listeners.add(App->scene_intro);
+					Building_List.add(a);
+					total_city_cubes++;
+				}
+				y = h / 2;
 			}
-			y = h / 2;
+			x = w / 2;
 		}
-		x = w / 2;
 	}
 }
 
@@ -278,7 +280,7 @@ update_status ModuleSceneIntro::Update(float dt)
 	//Time.SetPos(App->player->vehicle->GetPosition().x, App->player->vehicle->GetPosition().y, App->player->vehicle->GetPosition().z);
 
 	//Time.Render();
-	plane_Ground.Render();
+	//plane_Ground.Render();
 
 
 
@@ -358,7 +360,7 @@ void ModuleSceneIntro::OnCollision(PhysBody3D* body1, PhysBody3D* body2)
 			Buildings = Buildings->next;
 		}
 	}
-	if ((body1->type== MISSILE || body1->type == GROUND)&&body2->type == BUILDING|| (body2->type==MISSILE || body2->type == GROUND)&&body1->type == BUILDING) {
+	if ((body1->type== MISSILE || (body1->type ==VEHICLE&&App->player->vehicle->GetKmh()>=40))&&body2->type == BUILDING|| (body2->type==MISSILE || (body2->type == VEHICLE&&App->player->vehicle->GetKmh() >= 40)) &&body1->type == BUILDING) {
 		
 		if (body1->type == BUILDING&&body2->type!=BUILDING&&body2->type!=NONE) {
 			LastCollided = body1;
