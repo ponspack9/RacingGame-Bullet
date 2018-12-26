@@ -23,8 +23,9 @@ Application::Application()
 	AddModule(physics);
 	
 	// Scenes	
-	AddModule(player);
 	AddModule(scene_intro);
+	AddModule(player);
+
 
 
 	// Renderer last!
