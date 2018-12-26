@@ -40,8 +40,6 @@ struct VehicleInfo
 
 	vec3 OfsetCounter;
 
-
-
 	float mass;
 	float suspensionStiffness; // default to 5.88 / 10.0 offroad / 50.0 sports car / 200.0 F1 car
 	float suspensionCompression; // default to 0.83
@@ -61,9 +59,9 @@ struct VehicleInfo
 struct PhysVehicle3D : public PhysBody3D
 {
 public:
+
 	PhysVehicle3D(btRigidBody* body, btRaycastVehicle* vehicle, const VehicleInfo& info);
 	~PhysVehicle3D();
-
 
 	btVector3 IntitialRot;
 	void Render();

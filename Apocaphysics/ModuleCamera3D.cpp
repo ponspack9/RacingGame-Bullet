@@ -60,7 +60,7 @@ void ModuleCamera3D::CameraShake(float power) {
 		strenght -= 0.3 * power;
 	}
 	
-	Position = App->player->vehicle->Position() - App->player->vehicle->GoingForward() * 10 + vec3(0+strenght, 5+strenght, 0+strenght);
+	Position = App->player->vehicle->GetPosition() - App->player->vehicle->GoingForward() * 10 + vec3(0+strenght, 5, 0+strenght);
 	strenght = 0;
 	
 }
@@ -71,8 +71,13 @@ update_status ModuleCamera3D::Update(float dt)
 	// Now we can make this movememnt frame rate independant!
 
 	if (DoCameraShake) {
-		if (CameraShake_Time.ReadSeconds() < Time_Doing_Shake)
-			CameraShake(power);
+		if (CameraShake_Time.ReadSeconds() < Time_Doing_Shake) {
+			if (CameraShake_Time.Read()%4 == 0)
+				CameraShake(power); 
+			else {
+				Position = App->player->vehicle->GetPosition()- App->player->vehicle->GoingForward() * 10 + vec3(0 , 5, 0 );
+			}
+		}
 		else {
 			DoCameraShake = false;
 		}

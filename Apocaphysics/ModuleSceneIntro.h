@@ -45,6 +45,8 @@ public:
 	p2List<Cube*> Building_List;
 	p2List<PhysBody3D*>BuildingPhys_List;
 
+	vec3 SpotPoint;
+
 	PhysBody3D* pb_chassis;
 	Cube p_chassis;
 

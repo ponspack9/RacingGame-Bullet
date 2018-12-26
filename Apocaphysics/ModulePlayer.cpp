@@ -115,9 +115,10 @@ bool ModulePlayer::Start()
 	car.wheels[3].drive = false;
 	car.wheels[3].brake = true;
 	car.wheels[3].steering = false;
-	
+
 	vehicle = App->physics->AddVehicle(car);
-	vehicle->SetPos(40, 1, 10);
+	vehicle->SetPos(App->scene_intro->SpotPoint.x+10,10, App->scene_intro->SpotPoint.z+10);
+	vehicle->type = VEHICLE;
 	
 	vehicle->IntitialRot = vehicle->vehicle->getForwardVector();
 	vehicle->TimerG = 1.0f;
@@ -182,7 +183,7 @@ update_status ModulePlayer::Update(float dt)
 
 
 	if (App->camera->DoCameraShake == false) {
-		App->camera->Position = vehicle->Position() - vehicle->GoingForward() * 10 + vec3(0, 5, 0);
+		App->camera->Position = vehicle->GetPosition()- vehicle->GoingForward() * 10 + vec3(0, 5, 0);
 	}
 
 	App->camera->LookAt(vehicle->Position());
@@ -197,7 +198,8 @@ update_status ModulePlayer::Update(float dt)
 			else
 				acceleration = MAX_ACCELERATION;
 
-		}if (App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
+		}
+		if (App->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
 		{
 			acceleration = 8000.0f;
 
@@ -227,8 +229,6 @@ update_status ModulePlayer::Update(float dt)
 				brake = BRAKE_POWER;
 			else
 				acceleration = -MAX_ACCELERATION / 2;
-
-
 		}
 
 		if (vehicle->GetKmh() <= 5.0f) {
@@ -276,7 +276,7 @@ update_status ModulePlayer::Update(float dt)
 				Missiles->data->Render();
 				Missiles->data->time++;
 			}
-			if (Missiles->data->time >= 100) {
+			if (Missiles->data->time >= 50) {
 				Missiles->data->Gas.clear();
 				ShootPhys_List.del(Missiles_Phys);
 				Shooot_List.del(Missiles);
@@ -287,6 +287,9 @@ update_status ModulePlayer::Update(float dt)
 			Missiles_Phys = Missiles_Phys->next;
 		}
 
+		if (ScaleTime >= 6.2f) {
+			App->scene_intro->reStart();
+		}
 		vehicle->info.cubeCounter.size.Set(0.7, ScaleTime, 0.7);
 		vehicle->TimerG -= 0.002;
 		vehicle->TimerB -= 0.002;
