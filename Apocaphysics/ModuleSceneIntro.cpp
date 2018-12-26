@@ -71,7 +71,7 @@ void ModuleSceneIntro::CreateCity(float max_width, vec3 pos, float buildings_off
 		block_depth = ((rand() + SDL_GetTicks()) % 20) + 5.0f;
 
 		//Create last block
-		if (pos.x + block_width * 2 + buildings_offset * 4 >= (max_width + aux_pos.x)) 
+		if (pos.x + block_width * 2 + buildings_offset * 4 > (max_width + aux_pos.x)) 
 		{
 			block_width = ((aux_pos.x + max_width) - pos.x) / 2;
 			CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
@@ -90,10 +90,12 @@ void ModuleSceneIntro::CreateCity(float max_width, vec3 pos, float buildings_off
 			block_depth = ((rand() + SDL_GetTicks()) % 20) + 5.0f;
 
 			//Create last block
-			if (pos.z + block_depth * 2 + buildings_offset * 4 >= (max_width + aux_pos.z)) {
+			if (pos.z + block_depth * 2 + buildings_offset * 4 > (max_width + aux_pos.z)) {
 				block_depth = ((aux_pos.z + max_width) - pos.z)/2;
 				CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
 				if (block_width < 5) n_buildings = 0;
+				pos.z += block_depth * 2 + buildings_offset * 4 + road_offset;
+
 
 			}
 			else CreateBlock3x3(pos, n_buildings, block_width, block_height, block_depth, buildings_offset);
@@ -189,18 +191,18 @@ void ModuleSceneIntro::CreateBuilding(const vec3 &Position, const float &w, cons
 	float z = d / 2;
 	int HeightBuilding = rand() % 4 + 2;
 
-	Cube *a = new Cube();
-	a->size = vec3(w, h, d);
+	
 
 	for (z; z <= d * 2; z = z + d) {
 		for (x; x <= w * 2; x = x + w) {
 			for (y; y <= h * HeightBuilding; y = y + h) {
-        
+				Cube *a = new Cube();
+				a->size = vec3(w, h, d);
 				a->SetPos(x + Position.x, y + Position.y, z + Position.z);
 				a->wire = false;
 				a->color = Red;
 				BuildingPhys_List.add(App->physics->AddBody(*a, 50));
-        BuildingPhys_List.getLast()->data->type = BUILDING;
+				BuildingPhys_List.getLast()->data->type = BUILDING;
 				BuildingPhys_List.getLast()->data->collision_listeners.add(App->scene_intro);
 				Building_List.add(a);
 				total_city_cubes++;
