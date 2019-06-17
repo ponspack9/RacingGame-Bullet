@@ -18,7 +18,8 @@ ModulePlayer::~ModulePlayer()
 // Load assets
 bool ModulePlayer::Start()
 {
-
+	launch_fx = App->audio->LoadFx("audio/Explosion.wav");
+	motor_fx = App->audio->LoadFx("audio/Car_Going.wav");
 	ScaleTime = 0;
 	LOG("Loading player");
 	VehicleInfo car;	
@@ -171,7 +172,7 @@ void ModulePlayer::Shoot() {
 		shootLeft = true;
 		ShootRight = false;
 	}
-
+	App->audio->PlayFx(2,launch_fx);
 }
 
 

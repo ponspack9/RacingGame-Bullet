@@ -22,6 +22,7 @@ bool ModuleSceneIntro::Start()
 {
 	AbletoCameraShake = true;
 
+	App->audio->PlayMusic("audio/main_theme.ogg", 0);
 	LOG("Loading Intro assets");
 
 	total_city_cubes = 0;
@@ -285,14 +286,7 @@ bool ModuleSceneIntro::CleanUp()
 // Update
 update_status ModuleSceneIntro::Update(float dt)
 {
-
-	//Counter
-
-	//Time.SetPos(App->player->vehicle->GetPosition().x, App->player->vehicle->GetPosition().y, App->player->vehicle->GetPosition().z);
-
-	//Time.Render();
-	//plane_Ground.Render();
-
+	App->audio->PlayFx(1,App->player->motor_fx,0);
 
 
 	p2List_item<PhysBody3D*>*BuildingsPhys = BuildingPhys_List.getFirst();
@@ -339,7 +333,35 @@ update_status ModuleSceneIntro::Update(float dt)
 		App->player->debug_fly_around = !App->player->debug_fly_around;
 	}
 
+	if (App->input->GetKey(SDL_SCANCODE_F5) == KEY_REPEAT)
+	{
+		int actual_volume = Mix_VolumeMusic(-1);
+		if (actual_volume > 0) actual_volume--;
+		Mix_VolumeMusic(actual_volume);
+	}
+
+	if (App->input->GetKey(SDL_SCANCODE_F6) == KEY_REPEAT)
+	{
+		int actual_volume = Mix_VolumeMusic(-1);
+		if (actual_volume < MIX_MAX_VOLUME) actual_volume++;
+		Mix_VolumeMusic(actual_volume);
+	}
 	
+	if (App->input->GetKey(SDL_SCANCODE_F7) == KEY_REPEAT)
+	{
+		int actual_volume = Mix_Volume(-1, -1);
+		if (actual_volume > 0) actual_volume--;
+		Mix_Volume(-1, actual_volume);
+	}
+
+	if (App->input->GetKey(SDL_SCANCODE_F8) == KEY_REPEAT)
+	{
+		int actual_volume = Mix_Volume(-1, -1);
+		if (actual_volume < MIX_MAX_VOLUME) actual_volume++;
+		Mix_Volume(-1,actual_volume);
+	}
+
+
 
 	return UPDATE_CONTINUE;
 }

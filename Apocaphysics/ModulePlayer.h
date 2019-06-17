@@ -42,4 +42,7 @@ public:
 	Timer no_velocity_timer;
 
 	bool debug_fly_around;
+
+	uint launch_fx;
+	uint motor_fx;
 };
